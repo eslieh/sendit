@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, session, request, redirect, url_for
+from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
 from flask_restful import Api, Resource
 from flask_bcrypt import Bcrypt
@@ -23,6 +23,8 @@ bcrypt = Bcrypt(app)
 @app.route('/')
 def index():
     return '<h1>Send it</h1>'
+
+# AUTHENTICATION
 
 # Signup for Users
 @app.route('/signup_user', methods=['POST'])
@@ -72,7 +74,11 @@ def signup_courier():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    email = data[email]
+
+    if 'email' not in data or 'password' not in data:
+        return jsonify({'message': 'Missing email or password'}), 400
+
+    email = data['email']
     password = data['password']
 
     # Check for user first
@@ -106,6 +112,25 @@ def get_name():
         return jsonify({'message': 'Courier found', 'name': courier.first_name})
     else:
         return jsonify({'message': 'User or Courier not found'}), 404
+
+#  WALLET
+
+# Check wallet balance for user or courier
+@app.route('/wallet/balance', methods=['GET'])
+@jwt_required()
+def check_wallet_balance():
+    user_id = get_jwt_identity()
+
+    user = User.query.filter_by(id=user_id).first()
+    courier = Courier.query.filter_by(id=user_id).first()
+
+    if user and user.wallet:
+        return jsonify({"message": "User wallet balance retrieved", "balance": float(user.wallet.balance)}), 200
+    elif courier and courier.wallet:
+        return jsonify({"message": "Courier wallet balance retrieved", "balance": float(courier.wallet.balance)}), 200
+    else:
+        return jsonify({"message": "Wallet not found"}), 404
+
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
