@@ -37,7 +37,7 @@ class Courier(db.Model, SerializerMixin):
 class UserWallet(db.Model, SerializerMixin):
     __tablename__ = 'user_wallet'
     
-    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     balance = db.Column(DECIMAL(10, 2), nullable=False, default=0.00)
     
