@@ -220,5 +220,224 @@ def transfer_funds():
 
     return jsonify({'message': 'Payment successful', 'new_user_balance': float(user_wallet.balance), 'new_courier_balance': float(courier_wallet.balance)}), 200
 
+# ORDERS
+# Create a New Order
+@app.route('/orders', methods=['POST'])
+@jwt_required()
+def create_order():
+    data = request.get_json()
+    user_id = get_jwt_identity()
+
+    # Validate required fields
+    required_fields = ['courier_id', 'description', 'pickup_location', 'delivery_location', 'distance']
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'message': f'Missing required field: {field}'}), 400
+
+    # Get required details
+    courier_id = data.get('courier_id')
+    description = data.get('description')
+    pickup_location = data.get('pickup_location')
+    delivery_location = data.get('delivery_location')
+    distance = Decimal(str(data.get('distance')))  # Convert to Decimal for precise calculation
+
+    # Verify the courier exists
+    courier = Courier.query.get(courier_id)
+    if not courier:
+        return jsonify({'message': 'Courier not found'}), 404
+
+    # Get or create pricing if it doesn't exist
+    pricing = Pricing.query.filter_by(courier_id=courier_id).first()
+    if not pricing:
+        return jsonify({'message': 'Courier has not set their pricing'}), 400
+
+    # Calculate the total price
+    price_per_km = Decimal(str(pricing.price_per_km))
+    total_price = distance * price_per_km
+
+    # Verify user has sufficient funds
+    user_wallet = UserWallet.query.filter_by(user_id=user_id).first()
+    if not user_wallet:
+        return jsonify({'message': 'User wallet not found'}), 404
+
+    if user_wallet.balance < total_price:
+        return jsonify({
+            'message': 'Insufficient funds',
+            'required': float(total_price),
+            'current_balance': float(user_wallet.balance)
+        }), 400
+
+    try:
+        # Create new order
+        new_order = Delivery(
+            user_id=user_id,
+            courier_id=courier_id,
+            description=description,
+            pickup_location=pickup_location,
+            delivery_location=delivery_location,
+            pricing=total_price,
+            status='pending',
+            distance=float(distance)
+        )
+
+        # Deduct payment from user wallet
+        user_wallet.balance -= total_price
+        
+        db.session.add(new_order)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Order created successfully',
+            'order': {
+                'id': new_order.id,
+                'total_price': float(total_price),
+                'status': new_order.status,
+                'pickup_location': pickup_location,
+                'delivery_location': delivery_location
+            }
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error creating order', 'error': str(e)}), 500
+
+# Cancel an Order
+@app.route('/orders/<int:order_id>', methods=['DELETE'])
+@jwt_required()
+def cancel_order(order_id):
+    user_id = get_jwt_identity()
+    
+    # Find the order
+    order = Delivery.query.filter_by(id=order_id, user_id=user_id).first()
+    
+    if not order:
+        return jsonify({'message': 'Order not found or unauthorized'}), 404
+    
+    # Check if order status allows cancellation
+    if order.status not in ['pending', 'in_progress']:
+        return jsonify({
+            'message': 'Order cannot be cancelled',
+            'current_status': order.status
+        }), 400
+    
+    try:
+        # Refund the user
+        user_wallet = UserWallet.query.filter_by(user_id=user_id).first()
+        if user_wallet:
+            user_wallet.balance += Decimal(str(order.pricing))
+        
+        # Update order status
+        order.status = 'cancelled'
+        
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Order cancelled successfully',
+            'order': {
+                'id': order.id,
+                'refunded_amount': float(order.pricing),
+                'new_status': order.status,
+                'new_wallet_balance': float(user_wallet.balance)
+            }
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error cancelling order', 'error': str(e)}), 500
+
+# Update Delivery Location
+@app.route('/orders/<int:order_id>', methods=['PATCH'])
+@jwt_required()
+def update_delivery_location(order_id):
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    
+    # Validate input
+    new_location = data.get('delivery_location')
+    if not new_location:
+        return jsonify({'message': 'New delivery location is required'}), 400
+    
+    # Find the order
+    order = Delivery.query.filter_by(id=order_id, user_id=user_id).first()
+    
+    if not order:
+        return jsonify({'message': 'Order not found or unauthorized'}), 404
+    
+    # Check if order can be updated
+    if order.status != 'pending':
+        return jsonify({
+            'message': 'Order destination cannot be updated',
+            'current_status': order.status,
+            'reason': 'Only pending orders can be updated'
+        }), 400
+    
+    try:
+        # Store old location for response
+        old_location = order.delivery_location
+        
+        # Update delivery location
+        order.delivery_location = new_location
+        
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Delivery location updated successfully',
+            'order': {
+                'id': order.id,
+                'old_location': old_location,
+                'new_location': new_location,
+                'status': order.status
+            }
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error updating delivery location', 'error': str(e)}), 500
+
+# Get User Orders
+@app.route('/orders', methods=['GET'])
+@jwt_required()
+def get_user_orders():
+    user_id = get_jwt_identity()
+    status = request.args.get('status')  # Optional query parameter for filtering
+    
+    try:
+        # Base query
+        query = Delivery.query.filter_by(user_id=user_id)
+        
+        # Apply status filter if provided
+        if status:
+            query = query.filter_by(status=status)
+            
+        # Get orders and sort by creation date (newest first)
+        orders = query.order_by(Delivery.id.desc()).all()
+        
+        if not orders:
+            return jsonify({
+                'message': 'No orders found',
+                'orders': []
+            }), 200
+            
+        # Format orders for response
+        orders_list = [{
+            'id': order.id,
+            'description': order.description,
+            'pickup_location': order.pickup_location,
+            'delivery_location': order.delivery_location,
+            'status': order.status,
+            'price': float(order.pricing),
+            'distance': float(order.distance),
+            'courier_id': order.courier_id
+        } for order in orders]
+        
+        return jsonify({
+            'message': 'Orders retrieved successfully',
+            'total_orders': len(orders_list),
+            'orders': orders_list
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'message': 'Error retrieving orders', 'error': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
