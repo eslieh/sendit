@@ -195,3 +195,41 @@ def init_order_routes(app):
             
         except Exception as e:
             return jsonify({'message': 'Error retrieving orders', 'error': str(e)}), 500
+
+    @app.route('/orders/quote', methods=['POST'])
+    @jwt_required()
+    def get_quote():
+        data = request.get_json()
+        required_fields = ['distance']
+        
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'message': f'Missing required field: {field}'}), 400
+
+        distance = Decimal(str(data['distance']))
+        if distance <= 0:
+            return jsonify({'message': 'Distance must be greater than zero'}), 400
+
+        # Get all couriers and their pricing
+        couriers = Courier.query.all()
+        quotes = []
+
+        for courier in couriers:
+            pricing = Pricing.query.filter_by(courier_id=courier.id).first()
+            if pricing:
+                price_per_km = Decimal(str(pricing.price_per_km))
+                total_price = distance * price_per_km
+                quotes.append({
+                    'courier_id': courier.id,
+                    'courier_name': f"{courier.first_name} {courier.last_name}",
+                    'price_per_km': float(price_per_km),
+                    'total_price': float(total_price)
+                })
+
+        if not quotes:
+            return jsonify({'message': 'No available couriers for quotes'}), 404
+
+        return jsonify({
+            'message': 'Quotes retrieved successfully',
+            'quotes': quotes
+        }), 200
