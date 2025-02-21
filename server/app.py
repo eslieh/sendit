@@ -4,6 +4,8 @@ from flask_restful import Api
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from models import db
+from flask_cors import CORS
+
 
 from routes.auth_routes import init_auth_routes
 from routes.wallet_routes import init_wallet_routes
@@ -21,6 +23,7 @@ migrate = Migrate(app, db)
 
 api = Api(app)
 bcrypt = Bcrypt(app)
+CORS(app)
 
 @app.route('/')
 def index():
