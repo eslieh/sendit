@@ -6,8 +6,8 @@ const Auth = () => {
   const queryParams = new URLSearchParams(location.search);
   const roleFromURL = queryParams.get("ref") || "user"; // Default role: user
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState(roleFromURL);
+  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false); // Track submission state
   const [formData, setFormData] = useState({
     first_name: "",
