@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Auth = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const roleFromURL = queryParams.get("ref") || "user"; // Default to "user"
+  const roleFromURL = queryParams.get("ref") || "user"; // Default role: user
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState(roleFromURL);
+  const [loading, setLoading] = useState(false); // Track submission state
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -17,7 +17,7 @@ const Auth = () => {
   });
 
   useEffect(() => {
-    setRole(roleFromURL); // Update role if URL changes
+    setRole(roleFromURL);
   }, [roleFromURL]);
 
   const toggleAuthMode = () => {
@@ -29,20 +29,62 @@ const Auth = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const setToken = (token) => {
+    sessionStorage.setItem("access_token", token);
+    document.cookie = `access_token=${token}; path=/; secure; HttpOnly`;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(
-      `Submitting ${isLogin ? "Login" : "Signup"} for ${role}`,
-      formData
-    );
-    // Send request to backend
+    if (loading) return; // Prevent double submits
+
+    setLoading(true); // Start loading state
+
+    const url = isLogin
+      ? "https://sendit-5-2epe.onrender.com/login"
+      : role === "user"
+      ? "https://sendit-5-2epe.onrender.com/signup_user"
+      : "https://sendit-5-2epe.onrender.com/signup_courier";
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        if (isLogin) {
+          setToken(data.access_token);
+          alert(data.message);
+          navigate(role === "user" ? "/user" : "/courier");
+        } else {
+          alert("Signup successful! Please log in.");
+          setIsLogin(true);
+        }
+      } else {
+        alert(data.message || "Something went wrong.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Server error. Try again later.");
+    } finally {
+      setLoading(false); // Reset loading state
+    }
   };
 
   return (
     <div className="auth-container">
       <div className="center_contents">
         <div className="icon_details_where">
-            <img src="./senditmain.png" className="auth_image_conts" onClick={() => navigate('/')} alt="logo"/>
+          <img
+            src="./senditmain.png"
+            className="auth_image_conts"
+            onClick={() => navigate("/")}
+            alt="logo"
+          />
         </div>
         <div className="authenticator_form">
           <h2>
@@ -87,7 +129,16 @@ const Auth = () => {
               onChange={handleChange}
               required
             />
-            <button type="submit">{isLogin ? "Login" : "Signup"}</button>
+            <button
+              type="submit"
+              disabled={loading} // Disable button while loading
+              style={{
+                backgroundColor: loading ? "#009829a6" : "##00b560",
+                cursor: loading ? "not-allowed" : "pointer",
+              }}
+            >
+              {loading ? "Processing..." : isLogin ? "Login" : "Signup"}
+            </button>
           </form>
 
           <p onClick={toggleAuthMode} className="toggle-auth">
