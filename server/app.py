@@ -10,6 +10,7 @@ from flask_cors import CORS
 from routes.auth_routes import init_auth_routes
 from routes.wallet_routes import init_wallet_routes
 from routes.order_routes import init_order_routes
+from routes.courier_routes import init_courier_routes
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -33,6 +34,7 @@ def index():
 init_auth_routes(app, bcrypt)
 init_wallet_routes(app)
 init_order_routes(app)
+init_courier_routes(app)
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
