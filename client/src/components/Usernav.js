@@ -29,7 +29,7 @@ const Usernav = () => {
         <img
           src="/senditmain.png"
           className="main-image"
-          onClick={() => navigate("/")}  // Navigate to home on click
+          onClick={() => navigate("/user")}  // Navigate to home on click
           alt="logo"
         />
       </div>

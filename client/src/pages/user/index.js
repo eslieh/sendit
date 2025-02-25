@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Usernav from "../../components/Usernav";
-
+import api from "../../services/api";
 const UserHome = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [pickupLocation, setPickupLocation] = useState("");
@@ -9,14 +9,17 @@ const UserHome = () => {
   const [distance, setDistance] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const [loading_result, SetLoadingResults] = useState(true);
+  const [quotes, setQuotes] = useState(null);
   const handleModalToggle = () => {
     setModalOpen(!modalOpen);
   };
 
   // Geocode function to convert location to lat/lng using Nominatim API
   const geocodeLocation = async (address) => {
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${address}&format=json`);
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${address}&format=json`
+    );
     const data = await response.json();
     if (data && data[0]) {
       return {
@@ -59,8 +62,20 @@ const UserHome = () => {
         status: "In Transit",
         distance: routeDistance,
       };
+      const endpoint = "/orders/quote";
+      // const loading_result = false;
+      try {
+        const response = await api.post(endpoint, newDelivery);
+        console.log("posted");
+        console.log(response);
+        setQuotes(response.quotes);
+        SetLoadingResults(false);
+      } catch (error) {
+        console.error(error.message);
+        SetLoadingResults(true);
+      }
 
-      console.log("New Delivery:", newDelivery); // Log the delivery data with distance
+      // console.log("New Delivery:", newDelivery); // Log the delivery data with distance
 
       handleModalToggle(); // Close the modal
     } catch (err) {
@@ -69,7 +84,6 @@ const UserHome = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="main_user_class">
       <Usernav />
@@ -80,47 +94,79 @@ const UserHome = () => {
           </button>
         </div>
 
-        {/* Package Details Popup */}
-        {modalOpen && (
-          <div className="package-modal">
-            <div className="modal-content">
-              <h3>Enter Package Details</h3>
-              <label>Pickup Location:</label>
-              <input
-                type="text"
-                value={pickupLocation}
-                onChange={(e) => setPickupLocation(e.target.value)}
-              />
-              <label>Delivery Location:</label>
-              <input
-                type="text"
-                value={deliveryLocation}
-                onChange={(e) => setDeliveryLocation(e.target.value)}
-              />
-              <label>Package Description:</label>
-              <textarea
-                value={packageDescription}
-                onChange={(e) => setPackageDescription(e.target.value)}
-              />
-              <button onClick={handleSubmitPackage} disabled={loading}>
-                {loading ? "Processing..." : "Send Package"}
-              </button>
-              <button onClick={handleModalToggle}>Close</button>
-              {error && <p className="error">{error}</p>}
+        <div className="flex_wrappeed_contents">
+          {/* Package Details Popup */}
+          {modalOpen && (
+            <div className="action_puller">
+              <div className="package-modal">
+                <div className="modal-content">
+                  <h3>Enter Package Details</h3>
+                  <label>Pickup Location:</label>
+                  <input
+                    type="text"
+                    value={pickupLocation}
+                    onChange={(e) => setPickupLocation(e.target.value)}
+                  />
+                  <label>Delivery Location:</label>
+                  <input
+                    type="text"
+                    value={deliveryLocation}
+                    onChange={(e) => setDeliveryLocation(e.target.value)}
+                  />
+                  <label>Package Description:</label>
+                  <textarea
+                    value={packageDescription}
+                    onChange={(e) => setPackageDescription(e.target.value)}
+                  />
+                  <button onClick={handleSubmitPackage} disabled={loading}>
+                    {loading ? "Processing..." : "Send Package"}
+                  </button>
+                  <button onClick={handleModalToggle}>Close</button>
+                  {error && <p className="error">{error}</p>}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Show the distance once calculated */}
-        {distance !== null && (
-          <div className="distance-info">
-            <h4>Package Distance</h4>
-            <p>
-              The distance between your pickup and delivery locations is{" "}
-              {distance} kilometers.
-            </p>
-          </div>
-        )}
+          {/* Show the distance once calculated */}
+          {distance !== null && (
+            <div className="local_results">
+              <div className="distance-info">
+                <h4>Package Distance</h4>
+                <p>
+                  The distance between your pickup and delivery locations is{" "}
+                  {distance} kilometers.
+                </p>
+              </div>
+              <div className="results_contents">
+                {loading_result ? (
+                  <div className="results_loading">loading_quote</div>
+                ) : (
+                  <div className="deliverly_results">
+                    {quotes.map((courier) => (
+                      <div className="delivery_quotes" onClick={() => console.log(`courier id${courier.courier_name} was clicked`)}>
+                        <div className="courier_icon_info">
+                          <i className="fa-solid fa-truck"></i>
+                        </div>
+                        <div className="details_all">
+                          <div className="courier">{courier.courier_name}</div>
+                          <div className="courier-details">
+                            <div className="price_per_km">
+                              KES {courier.price_per_km} Per KM
+                             </div>
+                            <div className="total_price">
+                              KES {courier.total_price}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
