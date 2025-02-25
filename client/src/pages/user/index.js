@@ -59,7 +59,7 @@ const UserHome = () => {
         pickupLocation,
         deliveryLocation,
         packageDescription,
-        status: "In Transit",
+        status: "requested",
         distance: routeDistance,
       };
       const endpoint = "/orders/quote";
