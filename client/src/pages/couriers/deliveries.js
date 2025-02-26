@@ -7,6 +7,7 @@ const Deliveries = () => {
     { id: 1, customer: "John Doe", pickup: "Westlands", dropoff: "Kilimani", distance: "5.4 km", price: "$3.50", status: "pending" },
     { id: 2, customer: "Jane Smith", pickup: "CBD", dropoff: "Lavington", distance: "7.2 km", price: "$5.00", status: "pending" },
   ]);
+  // mod data 3
 
   const [inTransit, setInTransit] = useState([
     { id: 3, customer: "Mike Ross", pickup: "Ngong Road", dropoff: "Kasarani", distance: "15 km", price: "$8.00", status: "in-transit" },
