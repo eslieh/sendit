@@ -83,26 +83,42 @@ def init_auth_routes(app, bcrypt):
             return jsonify({'message': 'Login Success!', 'access_token': access_token, 'role': 'courier'})
 
         return jsonify({'message': 'Login Failed!'}), 401
-
+    
     @app.route('/get_user_name', methods=['GET'])
     @jwt_required()
     def get_user_name():
         user_id = get_jwt_identity()
         user = User.query.filter_by(id=user_id).first()
+        user_wallet = UserWallet.query.filter_by(id=user_id).first()  
 
         if user:
-            return jsonify({'message': 'User found', 'name': user.first_name})
+            return jsonify({
+                'message': 'User found',
+                'name': user.first_name,
+                'last_name': user.last_name,
+                'email': user.email,
+                'wallet_balance': float(user_wallet.balance) if user_wallet else 0.0
+            })
         else:
             return jsonify({'message': 'User not found'}), 404
+
 
     @app.route('/get_courier_name', methods=['GET'])
     @jwt_required()
     def get_courier_name():
         courier_id = get_jwt_identity()
         courier = Courier.query.filter_by(id=courier_id).first()
+        courier_wallet = CourierWallet.query.filter_by(courier_id=courier_id).first()
 
         if courier:
-            return jsonify({'message': 'Courier found', 'name': courier.first_name})
+            return jsonify({
+                'message': 'Courier found',
+                'name': courier.first_name,
+                'last_name': courier.last_name,
+                'email': courier.email,
+                'wallet_balance': float(courier_wallet.balance) if courier_wallet else 0.0
+            })
         else:
             return jsonify({'message': 'Courier not found'}), 404
+
 
