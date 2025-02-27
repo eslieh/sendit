@@ -86,6 +86,7 @@ def init_courier_routes(app):
         order.status = new_status
         db.session.commit()
 
+
         return jsonify({'message': 'Order status updated successfully', 'new_status': order.status}), 200
 
     @app.route('/couriers/<int:courier_id>/pricing', methods=['PATCH'])
