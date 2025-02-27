@@ -14,6 +14,8 @@ flask-sqlalchemy = "*"
 flask-migrate = "*"
 sqlalchemy-serializer = "*"
 flask-restful = "*"
+flask-mail = "*"
+flask-socketio = "*"
 
 [dev-packages]
 
