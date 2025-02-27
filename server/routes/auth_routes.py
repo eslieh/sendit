@@ -13,7 +13,7 @@ def init_auth_routes(app, bcrypt):
         email = data['email']
 
         if User.query.filter_by(email=email).first():
-            return jsonify({'message': 'Email already exists'}), 400
+            return jsonify({'message': 'Email already exists!'}), 400
 
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         new_user = User(password=hashed_password, first_name=first_name, last_name=last_name, email=email)
@@ -25,7 +25,7 @@ def init_auth_routes(app, bcrypt):
         db.session.add(user_wallet)
         db.session.commit()
 
-        return jsonify({'message': 'User created successfully'}), 201
+        return jsonify({'message': 'User created successfully!'}), 201
 
     @app.route('/signup_courier', methods=['POST'])
     def signup_courier():
@@ -36,7 +36,7 @@ def init_auth_routes(app, bcrypt):
         email = data['email']
 
         if Courier.query.filter_by(email=email).first():
-            return jsonify({'message': 'Email already exists'}), 400
+            return jsonify({'message': 'Email already exists!'}), 400
 
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         new_courier = Courier(password=hashed_password, first_name=first_name, last_name=last_name, email=email)
@@ -48,14 +48,14 @@ def init_auth_routes(app, bcrypt):
         db.session.add(courier_wallet)
         db.session.commit()
 
-        return jsonify({'message': 'Courier created successfully'}), 201
+        return jsonify({'message': 'Courier created successfully!'}), 201
     
     @app.route('/login_user', methods=['POST'])
     def login_user():
         data = request.get_json()
 
         if 'email' not in data or 'password' not in data:
-            return jsonify({'message': 'Missing email or password'}), 400
+            return jsonify({'message': 'Missing email or password!'}), 400
 
         email = data['email']
         password = data['password']
@@ -63,16 +63,16 @@ def init_auth_routes(app, bcrypt):
         user = User.query.filter_by(email=email).first()
         if user and bcrypt.check_password_hash(user.password, password):
             access_token = create_access_token(identity=user.id)
-            return jsonify({'message': 'Login Success', 'access_token': access_token, 'role': 'user'})
+            return jsonify({'message': 'Login Success!', 'access_token': access_token, 'role': 'user'})
 
-        return jsonify({'message': 'Login Failed'}), 401
+        return jsonify({'message': 'Login Failed!'}), 401
 
     @app.route('/login_courier', methods=['POST'])
     def login_courier():
         data = request.get_json()
 
         if 'email' not in data or 'password' not in data:
-            return jsonify({'message': 'Missing email or password'}), 400
+            return jsonify({'message': 'Missing email or password!'}), 400
 
         email = data['email']
         password = data['password']
@@ -80,9 +80,9 @@ def init_auth_routes(app, bcrypt):
         courier = Courier.query.filter_by(email=email).first()
         if courier and bcrypt.check_password_hash(courier.password, password):
             access_token = create_access_token(identity=courier.id)
-            return jsonify({'message': 'Login Success', 'access_token': access_token, 'role': 'courier'})
+            return jsonify({'message': 'Login Success!', 'access_token': access_token, 'role': 'courier'})
 
-        return jsonify({'message': 'Login Failed'}), 401
+        return jsonify({'message': 'Login Failed!'}), 401
 
     @app.route('/get_user_name', methods=['GET'])
     @jwt_required()
