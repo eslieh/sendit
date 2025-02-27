@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";  // Import useNavigate here
+import { Link, useNavigate, useLocation } from "react-router-dom"; 
 
 const navTabs = [
   {
@@ -20,7 +20,8 @@ const navTabs = [
 ];
 
 const Usernav = () => {
-  const navigate = useNavigate();  // Declare useNavigate inside the component
+  const navigate = useNavigate();
+  const location = useLocation();  // Get current route
 
   return (
     <div className="nav-main-container">
@@ -29,18 +30,18 @@ const Usernav = () => {
         <img
           src="/senditmain.png"
           className="main-image"
-          onClick={() => navigate("/user")}  // Navigate to home on click
+          onClick={() => navigate("/user")}
           alt="logo"
         />
       </div>
       <nav className="navigation_routes">
         <div className="nav-tabs">
           {navTabs.map((tab, index) => (
-            <div key={index} className="nav-tab">
-              <Link
-                to={tab.link}
-                className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}  // Conditionally add active class
-              >
+            <div
+              key={index}
+              className={`nav-tab ${location.pathname === tab.link ? "active" : ""}`} // Add active class when route matches
+            >
+              <Link to={tab.link} className="nav-link">
                 {tab.icon} <span>{tab.name}</span>
               </Link>
             </div>

@@ -38,7 +38,7 @@ const Auth = () => {
     setLoading(true); // Start loading state
 
     const endpoint = isLogin
-      ? "/login"
+      ? role === "user"? "/login_user" : "login_courier"
       : role === "user"
       ? "/signup_user"
       : "/signup_courier";
