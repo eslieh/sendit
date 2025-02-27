@@ -5,9 +5,7 @@ from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from models import db
 from flask_cors import CORS
-from flask_mail import Mail
-from flask_socketio import SocketIO
-
+from datetime import timedelta
 
 from routes.auth_routes import init_auth_routes
 from routes.wallet_routes import init_wallet_routes
@@ -19,12 +17,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SECRET_KEY'] = 'your_strong_secret_key'
 app.config["JWT_SECRET_KEY"] = 'your_jwt_secret_key'
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
-# Initialize Flask-Mail
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'your-email@gmail.com'  # Replace with your email
-app.config['MAIL_PASSWORD'] = 'your-app-password'     # Replace with app password
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
+
 
 jwt = JWTManager(app)
 db.init_app(app)
