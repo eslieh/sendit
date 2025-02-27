@@ -7,6 +7,10 @@ import Auth from './pages/auth';
 import UserHome from './pages/user';
 import DeliveriesUser from './pages/user/deliveries';
 import AccountUser from './pages/user/account';
+import CourierIndex from './pages/couriers';
+import History from './pages/couriers/history';
+import Deliveries from './pages/couriers/deliveries';
+import Company from './pages/couriers/company';
 function App() {
   return (
     <Router>
@@ -17,6 +21,10 @@ function App() {
         <Route path='/user' element={<UserHome/>}/>
         <Route path='/user/deliveries' element={<DeliveriesUser/>}/>
         <Route path='/user/account' element={<AccountUser/>}/>
+        <Route path='/courier' element={<CourierIndex/>}/>
+        <Route path='/courier/deliveries' element={<Deliveries/>}/>
+        <Route path='/courier/history' element={<History/>}/>
+        <Route path='/courier/company' element={<Company/>}/>
       </Routes>
     </Router>
   );
