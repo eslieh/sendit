@@ -105,27 +105,19 @@ def init_courier_routes(app):
 
         return jsonify({'message': 'Order status updated successfully', 'new_status': order.status}), 200
 
-    @app.route('/couriers/pricing', methods=['PATCH'])
+    # Pricing Functionalities
+    @app.route('/courier/pricing', methods=['GET'])
     @jwt_required()
-    def update_pricing():
+    def get_pricing():
+        """Fetch the pricing set by the courier"""
         courier_id = get_jwt_identity()
-
-
-        data = request.get_json()
-        new_price_per_km = data.get('price_per_km')
-
-        if new_price_per_km is None or new_price_per_km <= 0:
-            return jsonify({'message': 'Invalid price per kilometer'}), 400
-
         pricing = Pricing.query.filter_by(courier_id=courier_id).first()
+
         if not pricing:
-            return jsonify({'message': 'Pricing not found for this courier'}), 404
+            return jsonify({'message': 'Pricing not set for this courier'}), 404
 
-        pricing.price_per_km = new_price_per_km
-        db.session.commit()
-
-        return jsonify({'message': 'Pricing updated successfully', 'new_price_per_km': float(pricing.price_per_km)}), 200
-
+        return jsonify({'courier_id': courier_id, 'price_per_km': float(pricing.price_per_km)}), 200
+    
     @app.route('/couriers/pricing', methods=['POST'])
     @jwt_required()
     def set_pricing(courier_id):
@@ -150,6 +142,29 @@ def init_courier_routes(app):
         db.session.commit()
 
         return jsonify({'message': 'Pricing set successfully', 'price_per_km': float(price_per_km)}), 201 
+    
+    @app.route('/couriers/pricing', methods=['PATCH'])
+    @jwt_required()
+    def update_pricing():
+        courier_id = get_jwt_identity()
+
+
+        data = request.get_json()
+        new_price_per_km = data.get('price_per_km')
+
+        if new_price_per_km is None or new_price_per_km <= 0:
+            return jsonify({'message': 'Invalid price per kilometer'}), 400
+
+        pricing = Pricing.query.filter_by(courier_id=courier_id).first()
+        if not pricing:
+            return jsonify({'message': 'Pricing not found for this courier'}), 404
+
+        pricing.price_per_km = new_price_per_km
+        db.session.commit()
+
+        return jsonify({'message': 'Pricing updated successfully', 'new_price_per_km': float(pricing.price_per_km)}), 200
+
+
 
 # def send_email_notification(email, status, order):
 #     """Sends an email notification to the user about order status updates."""
