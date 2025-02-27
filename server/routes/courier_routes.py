@@ -106,7 +106,7 @@ def init_courier_routes(app):
         return jsonify({'message': 'Order status updated successfully', 'new_status': order.status}), 200
 
     # Pricing Functionalities
-    @app.route('/courier/pricing', methods=['GET'])
+    @app.route('/couriers/pricing', methods=['GET'])
     @jwt_required()
     def get_pricing():
         """Fetch the pricing set by the courier"""
