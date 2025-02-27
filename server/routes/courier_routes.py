@@ -32,9 +32,10 @@ def init_courier_routes(app):
         }), 200
 
 
-    @app.route('/couriers/<int:courier_id>/wallet', methods=['GET'])
+    @app.route('/couriers/wallet', methods=['GET'])
     @jwt_required()
-    def get_courier_wallet(courier_id):
+    def get_courier_wallet():
+        courier_id = get_jwt_identity()
         courier_wallet = CourierWallet.query.filter_by(courier_id=courier_id).first()
         if not courier_wallet:
             return jsonify({'message': 'Courier wallet not found'}), 404
@@ -44,13 +45,10 @@ def init_courier_routes(app):
             'balance': float(courier_wallet.balance)
         }), 200
 
-    @app.route('/couriers/<int:courier_id>/orders', methods=['GET'])
+    @app.route('/couriers/orders', methods=['GET'])
     @jwt_required()
-    def get_courier_orders(courier_id):
-        # Ensure the user is the courier
-        user_id = get_jwt_identity()
-        if user_id != courier_id:
-            return jsonify({'message': 'Unauthorized access'}), 403
+    def get_courier_orders():
+        courier_id = get_jwt_identity()
 
         # Fetch orders assigned to the courier
         orders = Delivery.query.filter_by(courier_id=courier_id).all()
@@ -75,12 +73,10 @@ def init_courier_routes(app):
             'orders': orders_list
         }), 200
 
-    @app.route('/couriers/<int:courier_id>/orders/<int:order_id>/status', methods=['PATCH'])
+    @app.route('/couriers/orders/<int:order_id>/status', methods=['PATCH'])
     @jwt_required()
-    def update_order_status(courier_id, order_id):
-        user_id = get_jwt_identity()
-        if user_id != courier_id:
-            return jsonify({'message': 'Unauthorized access'}), 403
+    def update_order_status(order_id):
+        courier_id = get_jwt_identity()
 
         order = Delivery.query.filter_by(id=order_id, courier_id=courier_id).first()
         if not order:
@@ -109,12 +105,11 @@ def init_courier_routes(app):
 
         return jsonify({'message': 'Order status updated successfully', 'new_status': order.status}), 200
 
-    @app.route('/couriers/<int:courier_id>/pricing', methods=['PATCH'])
+    @app.route('/couriers/pricing', methods=['PATCH'])
     @jwt_required()
-    def update_pricing(courier_id):
-        user_id = get_jwt_identity()
-        if user_id != courier_id:
-            return jsonify({'message': 'Unauthorized access'}), 403
+    def update_pricing():
+        courier_id = get_jwt_identity()
+
 
         data = request.get_json()
         new_price_per_km = data.get('price_per_km')
@@ -131,12 +126,10 @@ def init_courier_routes(app):
 
         return jsonify({'message': 'Pricing updated successfully', 'new_price_per_km': float(pricing.price_per_km)}), 200
 
-    @app.route('/couriers/<int:courier_id>/pricing', methods=['POST'])
+    @app.route('/couriers/pricing', methods=['POST'])
     @jwt_required()
     def set_pricing(courier_id):
-        user_id = get_jwt_identity()
-        if user_id != courier_id:
-            return jsonify({'message': 'Unauthorized access'}), 403
+        courier_id = get_jwt_identity()
 
         data = request.get_json()
         price_per_km = data.get('price_per_km')

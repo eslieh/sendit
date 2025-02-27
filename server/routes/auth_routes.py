@@ -94,7 +94,7 @@ def init_auth_routes(app, bcrypt):
         if user:
             return jsonify({
                 'message': 'User found',
-                'name': user.first_name,
+                'first_name': user.first_name,
                 'last_name': user.last_name,
                 'email': user.email,
                 'wallet_balance': float(user_wallet.balance) if user_wallet else 0.0
@@ -113,7 +113,7 @@ def init_auth_routes(app, bcrypt):
         if courier:
             return jsonify({
                 'message': 'Courier found',
-                'name': courier.first_name,
+                'first_name': courier.first_name,
                 'last_name': courier.last_name,
                 'email': courier.email,
                 'wallet_balance': float(courier_wallet.balance) if courier_wallet else 0.0
