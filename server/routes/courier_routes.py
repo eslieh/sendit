@@ -1,8 +1,17 @@
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Courier, CourierWallet, Delivery, Pricing, User, db
+# from flask_mail import Mail, Message
+# from flask_socketio import SocketIO, emit
+
+# Initialize Flask-Mail and Flask-SocketIO
+# mail = Mail()
+# socketio = SocketIO(cors_allowed_origins="*")
 
 def init_courier_routes(app):
+    # mail.init_app(app)
+    # socketio.init_app(app)
+
     @app.route('/couriers', methods=['GET'])
     @jwt_required()
     def get_couriers():
@@ -86,6 +95,17 @@ def init_courier_routes(app):
         order.status = new_status
         db.session.commit()
 
+        # Fetch user details
+        # user = User.query.get(order.user_id)
+        # if user and user.email:
+        #     send_email_notification(user.email, new_status, order)
+
+        # # Emit real-time notification
+        # socketio.emit('order_status_update', {
+        #     'order_id': order.id,
+        #     'new_status': new_status
+        # }, room=f'user_{order.user_id}')
+
 
         return jsonify({'message': 'Order status updated successfully', 'new_status': order.status}), 200
 
@@ -137,3 +157,16 @@ def init_courier_routes(app):
         db.session.commit()
 
         return jsonify({'message': 'Pricing set successfully', 'price_per_km': float(price_per_km)}), 201 
+
+# def send_email_notification(email, status, order):
+#     """Sends an email notification to the user about order status updates."""
+#     subject = f"Order #{order.id} Status Update"
+#     body = f"Hello,\n\nYour parcel status has changed to '{status}'.\n\nDelivery Details:\n- Pickup: {order.pickup_location}\n- Destination: {order.delivery_location}\n- Description: {order.description}\n\nThank you for using our service!"
+    
+#     msg = Message(subject, sender="no-reply@courierapp.com", recipients=[email])
+#     msg.body = body
+    
+#     try:
+#         mail.send(msg)
+#     except Exception as e:
+#         print(f"Error sending email: {str(e)}")
