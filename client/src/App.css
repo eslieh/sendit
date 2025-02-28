@@ -583,13 +583,24 @@ img.main-image {
   width: 100%;
   min-height: 48vh;
 }
-
+.delivery_quotes:hover {
+  transition: all ease 0.9s;
+  transform: scale(1.01);
+  cursor: pointer;
+  background: black;
+  color: white;
+}
 .delivery_quotes {
   display: flex
 ;
   gap: 8px;
+  padding: 5px;
+  background: #ededed;
+  width: fit-content;
+  margin-top: 4px;
+  border-radius: 10px;
+  transition: all ease 0.9s;
 }
-
 .courier_icon_info {
   width: 48px;
   height: 48px;

@@ -86,6 +86,7 @@ const UserHome = () => {
     }
   };
   const requestsDelivery = async (id) => {
+    const authorise = alert("Are you sure?")
     const endpoint = '/orders';
     const deliverly = {
       courier_id: id,
@@ -98,7 +99,7 @@ const UserHome = () => {
     try {
       const response = await api.post(endpoint, deliverly);
       
-      const responseMessage = response.data?.message || "No response message";
+      const responseMessage = response?.message || "No response message";
   
       alert(responseMessage);
   

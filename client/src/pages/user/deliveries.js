@@ -1,60 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Usernav from "../../components/Usernav";
 import "./deliveries.css";
+import api from "../../services/api"; // Ensure this is correctly configured
+import { data } from "react-router-dom";
 
 const DeliveriesUser = () => {
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      description: "Electronics Package",
-      pickup_location: "Downtown, Nairobi",
-      delivery_location: "Westlands, Nairobi",
-      status: "Delivered",
-      price: 500.0,
-      distance: 12.5,
-      courier_id: 101,
-    },
-    {
-      id: 2,
-      description: "Clothing Order",
-      pickup_location: "CBD, Nairobi",
-      delivery_location: "Kasarani, Nairobi",
-      status: "In Transit",
-      price: 300.0,
-      distance: 8.0,
-      courier_id: 102,
-    },
-    {
-      id: 3,
-      description: "Food Delivery",
-      pickup_location: "Karen, Nairobi",
-      delivery_location: "Ngong Road, Nairobi",
-      status: "Pending",
-      price: 250.0,
-      distance: 5.5,
-      courier_id: 103,
-    },
-  ]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const updateDropOff = async (id, newDropOff) => {
-    // Mock function to calculate new distance (Replace with OpenStreetMap API call)
-    const calculateDistance = async (pickup, dropoff) => {
-      console.log(`Calculating distance from ${pickup} to ${dropoff}...`);
-      return Math.random() * 10 + 5; // Mock distance (5-15 km)
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await api.get("/orders"); // Replace with your API endpoint
+        setOrders(response.orders);
+        console.log(response.orders)
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        setError("Failed to load orders.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const updatedOrders = orders.map(async (order) => {
-      if (order.id === id && order.status === "Pending") {
-        const newDistance = await calculateDistance(order.pickup_location, newDropOff);
-        const newPrice = newDistance * 50; // Example: 50 Ksh per km
+    fetchOrders();
+  }, []);
 
-        return { ...order, delivery_location: newDropOff, distance: newDistance, price: newPrice };
+  const updateDropOff = async (id, newDropOff) => {
+    try {
+      const response = await api.patch(`/orders/${id}`, {
+        delivery_location: newDropOff,
+      });
+
+      if (response.data.success) {
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === id
+              ? { ...order, delivery_location: newDropOff, distance: response.data.new_distance, price: response.data.new_price }
+              : order
+          )
+        );
       }
-      return order;
-    });
-
-    Promise.all(updatedOrders).then((updatedData) => setOrders(updatedData));
+    } catch (err) {
+      console.error("Error updating drop-off location:", err);
+      alert("Failed to update drop-off location.");
+    }
   };
+
+  // if (loading) return <p>Loading orders...</p>;
+  if (error) return <p className="error">{error}</p>;
 
   return (
     <div className="main_user_class">
@@ -82,7 +76,7 @@ const DeliveriesUser = () => {
                   <td>{order.description}</td>
                   <td>{order.pickup_location}</td>
                   <td>
-                    {order.status === "Pending" ? (
+                    {order.status === "pending" ? (
                       <input
                         type="text"
                         defaultValue={order.delivery_location}
@@ -94,9 +88,7 @@ const DeliveriesUser = () => {
                   </td>
                   <td>{order.distance.toFixed(1)}</td>
                   <td>Ksh {order.price.toFixed(2)}</td>
-                  <td className={`status ${order.status.toLowerCase()}`}>
-                    {order.status}
-                  </td>
+                  <td className={`status ${order.status.toLowerCase()}`}>{order.status}</td>
                   <td>
                     {order.status === "Pending" && (
                       <button className="update-btn" onClick={() => updateDropOff(order.id, order.delivery_location)}>
