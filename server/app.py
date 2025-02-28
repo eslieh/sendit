@@ -20,13 +20,14 @@ app.config["JWT_SECRET_KEY"] = 'your_jwt_secret_key'
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
 
-# # Initialize Flask-Mail
-# app.config['MAIL_SERVER'] = 'localhost'
-# app.config['MAIL_PORT'] = 1025  # Change to your local SMTP port
-# app.config['MAIL_USE_TLS'] = False
-# app.config['MAIL_USE_SSL'] = False
-# app.config['MAIL_USERNAME'] = None
-# app.config['MAIL_PASSWORD'] = None
+# Looking to send emails in production? Check out our Email API/SMTP product!
+app.config['MAIL_SERVER']='sandbox.smtp.mailtrap.io'
+app.config['MAIL_PORT'] = 2525
+app.config['MAIL_USERNAME'] = '33acddabb956ce'
+app.config['MAIL_PASSWORD'] = 'd35c5b47062eae'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+
 
 
 jwt = JWTManager(app)

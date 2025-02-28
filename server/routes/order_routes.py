@@ -129,11 +129,11 @@ def init_order_routes(app):
         if not order:
             return jsonify({'message': 'Order not found or unauthorized'}), 404
         
-        if order.status != 'pending':
+        if order.status == 'delivered':
             return jsonify({
                 'message': 'Order destination cannot be updated',
                 'current_status': order.status,
-                'reason': 'Only pending orders can be updated'
+                'reason': 'Only non-delivered orders can be updated'
             }), 400
         
         try:

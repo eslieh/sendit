@@ -1,16 +1,16 @@
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Courier, CourierWallet, Delivery, Pricing, User, db
-# from flask_mail import Mail, Message
-# from flask_socketio import SocketIO, emit
+from flask_mail import Mail, Message
+from flask_socketio import SocketIO, emit
 
 # Initialize Flask-Mail and Flask-SocketIO
-# mail = Mail()
-# socketio = SocketIO(cors_allowed_origins="*")
+mail = Mail()
+socketio = SocketIO(cors_allowed_origins="*")
 
 def init_courier_routes(app):
-    # mail.init_app(app)
-    # socketio.init_app(app)
+    mail.init_app(app)
+    socketio.init_app(app)
 
     @app.route('/couriers', methods=['GET'])
     @jwt_required()
@@ -92,18 +92,52 @@ def init_courier_routes(app):
         db.session.commit()
 
         # Fetch user details
-        # user = User.query.get(order.user_id)
-        # if user and user.email:
-        #     send_email_notification(user.email, new_status, order)
+        user = User.query.get(order.user_id)
+        if user and user.email:
+            send_status_email(user.email, new_status, order)
 
-        # # Emit real-time notification
-        # socketio.emit('order_status_update', {
-        #     'order_id': order.id,
-        #     'new_status': new_status
-        # }, room=f'user_{order.user_id}')
+        # Emit real-time notification
+        socketio.emit('order_status_update', {
+            'order_id': order.id,
+            'new_status': new_status
+        }, room=f'user_{order.user_id}')
 
 
         return jsonify({'message': 'Order status updated successfully', 'new_status': order.status}), 200
+    
+    @app.route('/couriers/orders/<int:order_id>/location', methods=['PATCH'])
+    @jwt_required()
+    def update_order_location(order_id):
+        """Updates only the order's present location & sends notifications"""
+        courier_id = get_jwt_identity()
+        order = Delivery.query.filter_by(id=order_id, courier_id=courier_id).first()
+
+        if not order:
+            return jsonify({'message': 'Order not found or unauthorized'}), 404
+
+        data = request.get_json()
+        new_location = data.get('present_location')
+
+        if not new_location:
+            return jsonify({'message': 'Invalid location'}), 400
+
+        order.present_location = new_location
+        db.session.commit()
+
+        # Notify user
+        user = User.query.get(order.user_id)
+        if user and user.email:
+            send_location_email(user.email, new_location, order)
+
+        socketio.emit('order_location_update', {
+            'order_id': order.id,
+            'present_location': new_location
+        }, room=f'user_{order.user_id}')
+
+        return jsonify({
+            'message': 'Order location updated successfully',
+            'present_location': order.present_location
+        }), 200
 
     # Pricing Functionalities
     @app.route('/couriers/pricing', methods=['GET'])
@@ -164,17 +198,52 @@ def init_courier_routes(app):
 
         return jsonify({'message': 'Pricing updated successfully', 'new_price_per_km': float(pricing.price_per_km)}), 200
 
+# Email Notification
+def send_status_email(email, status, order):
+    """Sends email notification when parcel status changes"""
+    subject = f"Update: Order #{order.id} Status Changed"
+    body = f"""Hello,
+
+Your parcel status has been updated to **{status}**.
+
+Delivery Details:
+- Pickup: {order.pickup_location}
+- Destination: {order.delivery_location}
+- Description: {order.description}
+
+Thank you for choosing our service!
+
+Best regards,  
+SendIt Courier Team"""
+
+    send_email(email, subject, body)
 
 
-# def send_email_notification(email, status, order):
-#     """Sends an email notification to the user about order status updates."""
-#     subject = f"Order #{order.id} Status Update"
-#     body = f"Hello,\n\nYour parcel status has changed to '{status}'.\n\nDelivery Details:\n- Pickup: {order.pickup_location}\n- Destination: {order.delivery_location}\n- Description: {order.description}\n\nThank you for using our service!"
+def send_location_email(email, location, order):
+    """Sends email notification when parcel location changes"""
+    subject = f"Update: Order #{order.id} Location Changed"
+    body = f"""Hello,
+
+Your parcel is now at **{location}**.
+
+Delivery Details:
+- Pickup: {order.pickup_location}
+- Destination: {order.delivery_location}
+- Description: {order.description}
+
+Thank you for choosing our service!
+
+Best regards,  
+SendIt Courier Team"""
+
+    send_email(email, subject, body)
+
+def send_email(email, subject, body):
+    """Sends an email with the given subject and body"""
+    msg = Message(subject, sender="SendIt@courierapp.com", recipients=[email])
+    msg.body = body
     
-#     msg = Message(subject, sender="no-reply@courierapp.com", recipients=[email])
-#     msg.body = body
-    
-#     try:
-#         mail.send(msg)
-#     except Exception as e:
-#         print(f"Error sending email: {str(e)}")
+    try:
+        mail.send(msg)
+    except Exception as e:
+        print(f"Error sending email: {str(e)}")
