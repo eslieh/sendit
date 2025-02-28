@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import api from "../services/api"; // Import the Axios service
 
 const Auth = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const roleFromURL = queryParams.get("ref") || "user"; // Default role: user
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
   const [role, setRole] = useState(roleFromURL);
+  const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false); // Track submission state
   const [formData, setFormData] = useState({
     first_name: "",
@@ -25,10 +26,6 @@ const Auth = () => {
     setFormData({ first_name: "", last_name: "", email: "", password: "" });
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
   const setToken = (token) => {
     sessionStorage.setItem("access_token", token);
     document.cookie = `access_token=${token}; path=/; secure; HttpOnly`;
@@ -40,36 +37,26 @@ const Auth = () => {
 
     setLoading(true); // Start loading state
 
-    const url = isLogin
-      ? "https://sendit-5-2epe.onrender.com/login"
+    const endpoint = isLogin
+      ? "/login"
       : role === "user"
-      ? "https://sendit-5-2epe.onrender.com/signup_user"
-      : "https://sendit-5-2epe.onrender.com/signup_courier";
+      ? "/signup_user"
+      : "/signup_courier";
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const response = await api.post(endpoint, formData); // Use Axios API service
 
-      const data = await response.json();
-
-      if (response.ok) {
-        if (isLogin) {
-          setToken(data.access_token);
-          alert(data.message);
-          navigate(role === "user" ? "/user" : "/courier");
-        } else {
-          alert("Signup successful! Please log in.");
-          setIsLogin(true);
-        }
+      if (isLogin) {
+        setToken(response.access_token);
+        alert(response.message);
+        navigate(role === "user" ? "/user" : "/courier");
       } else {
-        alert(data.message || "Something went wrong.");
+        alert("Signup successful! Please log in.");
+        setIsLogin(true);
       }
     } catch (error) {
-      console.error("Error:", error);
-      alert("Server error. Try again later.");
+      console.error("Error:", error.response?.data || error.message);
+      alert(error.response?.data?.message || "Something went wrong.");
     } finally {
       setLoading(false); // Reset loading state
     }
@@ -100,7 +87,9 @@ const Auth = () => {
                   name="first_name"
                   placeholder="First Name"
                   value={formData.first_name}
-                  onChange={handleChange}
+                  onChange={(e) =>
+                    setFormData({ ...formData, first_name: e.target.value })
+                  }
                   required
                 />
                 <input
@@ -108,7 +97,9 @@ const Auth = () => {
                   name="last_name"
                   placeholder="Last Name"
                   value={formData.last_name}
-                  onChange={handleChange}
+                  onChange={(e) =>
+                    setFormData({ ...formData, last_name: e.target.value })
+                  }
                   required
                 />
               </>
@@ -118,7 +109,9 @@ const Auth = () => {
               name="email"
               placeholder="Email"
               value={formData.email}
-              onChange={handleChange}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
               required
             />
             <input
@@ -126,7 +119,9 @@ const Auth = () => {
               name="password"
               placeholder="Password"
               value={formData.password}
-              onChange={handleChange}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
               required
             />
             <button
