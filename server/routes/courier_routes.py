@@ -154,7 +154,7 @@ def init_courier_routes(app):
     
     @app.route('/couriers/pricing', methods=['POST'])
     @jwt_required()
-    def set_pricing(courier_id):
+    def set_pricing():
         courier_id = get_jwt_identity()
 
         data = request.get_json()

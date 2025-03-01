@@ -25,7 +25,7 @@ def init_wallet_routes(app):
     def deposit_user_funds():
         user_id = get_jwt_identity()
         data = request.get_json()
-        amount = data.get('amount')
+        amount = Decimal(data.get('amount'))
 
         if amount is None or amount <= 0:
             return jsonify({"message": "Invalid deposit amount"}), 400

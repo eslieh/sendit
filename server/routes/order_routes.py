@@ -116,45 +116,70 @@ def init_order_routes(app):
 
     @app.route('/orders/<int:order_id>', methods=['PATCH'])
     @jwt_required()
-    def update_delivery_location(order_id):
+    def update_delivery_details(order_id):
         user_id = get_jwt_identity()
         data = request.get_json()
-        
+
         new_location = data.get('delivery_location')
+        new_distance = data.get('distance')
+
         if not new_location:
             return jsonify({'message': 'New delivery location is required'}), 400
-        
+
+        if new_distance is None or not isinstance(new_distance, (int, float)) or new_distance <= 0:
+            return jsonify({'message': 'Invalid distance value'}), 400
+
         order = Delivery.query.filter_by(id=order_id, user_id=user_id).first()
-        
+
         if not order:
             return jsonify({'message': 'Order not found or unauthorized'}), 404
-        
+
         if order.status == 'delivered':
             return jsonify({
-                'message': 'Order destination cannot be updated',
+                'message': 'Order details cannot be updated',
                 'current_status': order.status,
                 'reason': 'Only non-delivered orders can be updated'
             }), 400
-        
+
         try:
+            # Fetch the courier's pricing per km
+            courier_pricing = Pricing.query.filter_by(courier_id=order.courier_id).first()
+            if not courier_pricing:
+                return jsonify({'message': 'Courier pricing not found'}), 404
+
+            # Calculate new pricing based on updated distance
+            new_pricing = float(new_distance) * float(courier_pricing.price_per_km)
+
             old_location = order.delivery_location
+            old_distance = order.distance
+            old_pricing = order.pricing
+
+            # Update order details
             order.delivery_location = new_location
-            
+            order.distance = new_distance
+            order.pricing = new_pricing
+
             db.session.commit()
-            
+
             return jsonify({
-                'message': 'Delivery location updated successfully',
+                'message': 'Delivery details updated successfully',
                 'order': {
                     'id': order.id,
                     'old_location': old_location,
                     'new_location': new_location,
+                    'old_distance': float(old_distance),
+                    'new_distance': float(new_distance),
+                    'old_pricing': float(old_pricing),
+                    'new_pricing': float(new_pricing),
                     'status': order.status
                 }
             }), 200
-            
+
         except Exception as e:
             db.session.rollback()
-            return jsonify({'message': 'Error updating delivery location', 'error': str(e)}), 500
+            return jsonify({'message': 'Error updating order details', 'error': str(e)}), 500
+
+
 
     @app.route('/orders', methods=['GET'])
     @jwt_required()
