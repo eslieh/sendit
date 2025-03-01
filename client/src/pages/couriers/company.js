@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import CauNav from "../../components/CauNav";
 import api from "../../services/api"; // Axios instance
-
+import { useNotify } from "../../services/NotifyContext";
 const Company = () => {
   const [walletBalance, setWalletBalance] = useState(0.0);
   const [pricePerKm, setPricePerKm] = useState(0.0);
   const [newPrice, setNewPrice] = useState("");
   const [loadingWallet, setLoadingWallet] = useState(true);
   const [loadingPrice, setLoadingPrice] = useState(true);
-
+  const notify = useNotify()
   // Fetch Wallet Balance
   useEffect(() => {
     const fetchWalletBalance = async () => {
@@ -17,7 +17,7 @@ const Company = () => {
         setWalletBalance(response.data.balance);
       } catch (error) {
         console.error("Error fetching wallet balance:", error);
-        alert("Failed to load wallet balance.");
+        notify("Failed to load wallet balance.", false);
       } finally {
         setLoadingWallet(false);
       }
@@ -34,7 +34,7 @@ const Company = () => {
         setPricePerKm(response.data.price_per_km);
       } catch (error) {
         console.error("Error fetching price per km:", error);
-        alert("Failed to load price per km.");
+        notify("Failed to load price per km.", false);
       } finally {
         setLoadingPrice(false);
       }
@@ -46,20 +46,21 @@ const Company = () => {
   // Update Price Per KM
   const handleUpdatePrice = async () => {
     if (!newPrice || isNaN(newPrice) || parseFloat(newPrice) <= 0) {
-      alert("Enter a valid price!");
+      notify("Enter a valid price!", false);
       return;
     }
 
     try {
-      const response = await api.put("/couries/pricing", {
+      const formData = {
         price_per_km: parseFloat(newPrice),
-      });
-      setPricePerKm(response.data.price_per_km);
+      }
+      const response = await api.post("/couriers/pricing", formData);
+      setPricePerKm(response.price_per_km);
       setNewPrice("");
-      alert("Price per KM updated successfully!");
+      notify("Price per KM updated successfully!", true);
     } catch (error) {
       console.error("Error updating price:", error);
-      alert("Failed to update price. Try again.");
+      notify("Failed to update price. Try again.", false);
     }
   };
 
@@ -67,7 +68,7 @@ const Company = () => {
   const handleLogout = () => {
     sessionStorage.removeItem("userToken");
     localStorage.removeItem("userToken");
-    alert("Logging out...");
+    notify("Logging out...", true);
     window.location.href = "/auth";
   };
 

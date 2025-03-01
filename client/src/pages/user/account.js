@@ -3,31 +3,42 @@ import { useNavigate } from "react-router-dom";
 import Usernav from "../../components/Usernav";
 import "./account.css";
 import api from "../../services/api";
+import { useNotify } from "../../services/NotifyContext";
 
 const AccountUser = () => {
   const navigate = useNavigate();
-
-  // Mock user data (Replace with actual API/user context)
-  const user = {
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    walletBalance: 0.0, // Mock balance
-  };
-
-  const [balance, setBalance] = useState(user.walletBalance);
+  const notify = useNotify();
+  const [user, setUser] = useState(null);
+  const [balance, setBalance] = useState(0);
   const [topupAmount, setTopupAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("pesapal");
   const [paymentDetails, setPaymentDetails] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch balance only once when the component mounts
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await api.get("/get_user_name");
+        setUser(response);
+      } catch (err) {
+        setError("Failed to fetch user data.");
+        notify("Failed to fetch user data.", false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
   useEffect(() => {
     const fetchBalance = async () => {
       try {
         const response = await api.get("/wallet/user/balance");
         setBalance(response.balance);
       } catch (error) {
-        console.error("Error fetching balance:", error);
+        notify("Error fetching balance.", false);
       }
     };
 
@@ -37,15 +48,14 @@ const AccountUser = () => {
   const handleLogout = () => {
     sessionStorage.removeItem("userToken");
     localStorage.removeItem("userToken");
+    notify("Logged out successfully.", true);
     navigate("/auth");
   };
 
   const validatePayment = () => {
     if (paymentMethod === "card") {
-      // Simple card validation (16 digits)
       return /^[0-9]{16}$/.test(paymentDetails);
     } else if (paymentMethod === "pesapal") {
-      // Simple Pesapal validation (mock format)
       return /^[0-9]{10}$/.test(paymentDetails);
     }
     return false;
@@ -53,12 +63,12 @@ const AccountUser = () => {
 
   const handleTopup = async () => {
     if (!topupAmount || isNaN(topupAmount) || parseFloat(topupAmount) <= 0) {
-      alert("Enter a valid top-up amount.");
+      notify("Enter a valid top-up amount.", true);
       return;
     }
 
     if (!validatePayment()) {
-      alert("Invalid payment details. Please check your credentials.");
+      notify("Invalid payment details. Please check your credentials.", true);
       return;
     }
 
@@ -67,17 +77,19 @@ const AccountUser = () => {
         amount: parseFloat(topupAmount),
       });
 
-      if (response.new_balance) {
+      if (response.new_balance !== undefined) {
         setBalance(response.new_balance);
         setTopupAmount("");
         setPaymentDetails("");
-        alert(`Successfully topped up Ksh ${topupAmount}!`);
+        notify(`Successfully topped up Ksh ${topupAmount}!`, false);
       }
     } catch (error) {
-      console.error("Error topping up:", error);
-      alert("Something went wrong: " + (error.response?.data?.message || error.message));
+      notify("Something went wrong while topping up.", true);
     }
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div className="main_user_class">
@@ -85,27 +97,26 @@ const AccountUser = () => {
       <div className="rest_body_contents">
         <h2 className="page-title">Account Settings</h2>
 
-        {/* User Info Section */}
-        <div className="user-info">
-          <div className="avatar">
-            {user.firstName[0]}
-            {user.lastName[0]}
+        {user && (
+          <div className="user-info">
+            <div className="avatar">
+              {user.first_name?.[0] || "U"}
+              {user.last_name?.[0] || ""}
+            </div>
+            <div className="user-details">
+              <h3 className="user-name">
+                {user.first_name} {user.last_name}
+              </h3>
+              <p className="user-email">{user.email}</p>
+            </div>
           </div>
-          <div className="user-details">
-            <h3 className="user-name">
-              {user.firstName} {user.lastName}
-            </h3>
-            <p className="user-email">{user.email}</p>
-          </div>
-        </div>
+        )}
 
-        {/* Wallet Section */}
         <div className="wallet-sections">
           <div className="walletdet">
             <h3 className="wallet-title">Wallet Balance</h3>
             <p className="wallet-balance">Ksh {balance.toFixed(2)}</p>
           </div>
-          {/* Top-up Form */}
           <div className="topup-form">
             <input
               type="number"
@@ -139,7 +150,6 @@ const AccountUser = () => {
           </div>
         </div>
 
-        {/* Logout & Links */}
         <div className="account-section">
           <button className="logout-btn" onClick={handleLogout}>
             Logout

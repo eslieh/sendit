@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import api from "../services/api"; // Import the Axios service
+import api from "../services/api";
+import { useNotify } from "../services/NotifyContext"; // Import notify hook
 
 const Auth = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const roleFromURL = queryParams.get("ref") || "user"; // Default role: user
+  const roleFromURL = queryParams.get("ref") || "user"; 
   const navigate = useNavigate();
+  const notify = useNotify(); // Use notify context
+
   const [role, setRole] = useState(roleFromURL);
   const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false); // Track submission state
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -33,32 +36,28 @@ const Auth = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (loading) return; // Prevent double submits
+    if (loading) return;
 
-    setLoading(true); // Start loading state
-
+    setLoading(true);
     const endpoint = isLogin
-      ? role === "user"? "/login_user" : "login_courier"
-      : role === "user"
-      ? "/signup_user"
-      : "/signup_courier";
+      ? role === "user" ? "/login_user" : "/login_courier"
+      : role === "user" ? "/signup_user" : "/signup_courier";
 
     try {
-      const response = await api.post(endpoint, formData); // Use Axios API service
+      const response = await api.post(endpoint, formData);
 
       if (isLogin) {
         setToken(response.access_token);
-        alert(response.message);
+        notify(response.message, false); // Success notification
         navigate(role === "user" ? "/user" : "/courier");
       } else {
-        alert("Signup successful! Please log in.");
+        notify("Signup successful! Please log in.", false);
         setIsLogin(true);
       }
     } catch (error) {
-      console.error("Error:", error.response?.data || error.message);
-      alert(error.response?.data?.message || "Something went wrong.");
+      notify(error.response?.data?.message || "Something went wrong.", true);
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
 
@@ -126,7 +125,7 @@ const Auth = () => {
             />
             <button
               type="submit"
-              disabled={loading} // Disable button while loading
+              disabled={loading}
               style={{
                 backgroundColor: loading ? "#009829a6" : "##00b560",
                 cursor: loading ? "not-allowed" : "pointer",

@@ -3,8 +3,9 @@ import Usernav from "../../components/Usernav";
 import "./deliveries.css";
 import api from "../../services/api"; // Ensure this is correctly configured
 import { data } from "react-router-dom";
-
+import { useNotify } from "../../services/NotifyContext";
 const DeliveriesUser = () => {
+  const notify = useNotify()
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +18,7 @@ const DeliveriesUser = () => {
         console.log(response.orders)
       } catch (err) {
         console.error("Error fetching orders:", err);
+        notify("there was problem loading deliveries",  true)
         setError("Failed to load orders.");
       } finally {
         setLoading(false);
@@ -40,10 +42,11 @@ const DeliveriesUser = () => {
               : order
           )
         );
+        notify("Dropoff location updated successfull", false)
       }
     } catch (err) {
       console.error("Error updating drop-off location:", err);
-      alert("Failed to update drop-off location.");
+      notify("Failed to update drop-off location.", true);
     }
   };
 
