@@ -41,7 +41,7 @@ def init_wallet_routes(app):
         user.wallet.balance += Decimal(str(amount))
         db.session.commit()
         
-        return jsonify({"message": "Deposit successful", "new_balance": float(user.wallet.balance)}), 200
+        return jsonify({"message": "Deposit successful!", "new_balance": float(user.wallet.balance)}), 200
 
     @app.route('/wallet/user/withdraw', methods=['POST'])
     @jwt_required()
@@ -64,7 +64,7 @@ def init_wallet_routes(app):
         user_wallet.balance -= Decimal(str(amount))
         db.session.commit()
 
-        return jsonify({'message': 'Withdrawal successful', 'new_balance': float(user_wallet.balance)}), 200
+        return jsonify({'message': 'Withdrawal successful!', 'new_balance': float(user_wallet.balance)}), 200
 
     # Courier Wallet Routes
     @app.route('/wallet/courier/balance', methods=['GET'])
@@ -98,7 +98,7 @@ def init_wallet_routes(app):
         courier.wallet.balance += Decimal(str(amount))
         db.session.commit()
 
-        return jsonify({"message": "Deposit successful", "new_balance": float(courier.wallet.balance)}), 200
+        return jsonify({"message": "Deposit successful!", "new_balance": float(courier.wallet.balance)}), 200
 
     @app.route('/wallet/courier/withdraw', methods=['POST'])
     @jwt_required()
@@ -121,7 +121,7 @@ def init_wallet_routes(app):
         courier_wallet.balance -= Decimal(str(amount))
         db.session.commit()
 
-        return jsonify({'message': 'Withdrawal successful', 'new_balance': float(courier_wallet.balance)}), 200
+        return jsonify({'message': 'Withdrawal successful!', 'new_balance': float(courier_wallet.balance)}), 200
 
 
     @app.route('/wallet/transfer', methods=['POST'])
@@ -150,7 +150,7 @@ def init_wallet_routes(app):
         db.session.commit()
 
         return jsonify({
-            'message': 'Payment successful', 
+            'message': 'Payment successful!', 
             'new_user_balance': float(user_wallet.balance), 
             'new_courier_balance': float(courier_wallet.balance)
         }), 200
