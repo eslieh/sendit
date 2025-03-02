@@ -75,8 +75,12 @@ def init_wallet_routes(app):
 
         if courier and courier.wallet:
             return jsonify({"message": "Courier wallet balance", "balance": float(courier.wallet.balance)}), 200
-        return jsonify({"message": "Courier wallet not found"}), 404
-
+        else:
+            courier.wallet = CourierWallet(courier_id=courier.id, balance=0.00)
+            db.session.add(courier.wallet)
+            db.session.commit()
+            return jsonify({"message": "Courier wallet balance", "balance": float(courier.wallet.balance)}), 200
+        
     @app.route('/wallet/courier/deposit', methods=['POST'])
     @jwt_required()
     def deposit_courier_funds():

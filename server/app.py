@@ -12,6 +12,7 @@ from routes.auth_routes import init_auth_routes
 from routes.wallet_routes import init_wallet_routes
 from routes.order_routes import init_order_routes
 from routes.courier_routes import init_courier_routes
+from routes.courier_stats import init_courier_stats
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -49,6 +50,6 @@ init_auth_routes(app, bcrypt)
 init_wallet_routes(app)
 init_order_routes(app)
 init_courier_routes(app)
-
+init_courier_stats(app)
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

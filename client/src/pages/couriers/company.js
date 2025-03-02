@@ -13,8 +13,8 @@ const Company = () => {
   useEffect(() => {
     const fetchWalletBalance = async () => {
       try {
-        const response = await api.get("/couriers/wallet");
-        setWalletBalance(response.data.balance);
+        const response = await api.get("/wallet/courier/balance");
+        setWalletBalance(response.balance);
       } catch (error) {
         console.error("Error fetching wallet balance:", error);
         notify("Failed to load wallet balance.", false);
@@ -31,7 +31,7 @@ const Company = () => {
     const fetchPricePerKm = async () => {
       try {
         const response = await api.get("/couriers/pricing");
-        setPricePerKm(response.data.price_per_km);
+        setPricePerKm(response.price_per_km);
       } catch (error) {
         console.error("Error fetching price per km:", error);
         notify("Failed to load price per km.", false);
@@ -46,8 +46,8 @@ const Company = () => {
   // Update Price Per KM
   const handleUpdatePrice = async () => {
     if (!newPrice || isNaN(newPrice) || parseFloat(newPrice) <= 0) {
-      notify("Enter a valid price!", false);
-      return;
+      // notify("Enter a valid price!", false);
+      // return;
     }
 
     try {
@@ -82,7 +82,7 @@ const Company = () => {
           {loadingWallet ? (
             <p>Loading wallet balance...</p>
           ) : (
-            <p>Balance: <span>${walletBalance.toFixed(2)}</span></p>
+            <p>Balance: <span>KES {walletBalance.toFixed(2)}</span></p>
           )}
         </div>
 
@@ -93,7 +93,7 @@ const Company = () => {
             <p>Loading price per km...</p>
           ) : (
             <>
-              <p>Current Rate: <strong>${pricePerKm.toFixed(2)}</strong> per km</p>
+              <p>Current Rate: <strong>KES {pricePerKm.toFixed(2)}</strong> per km</p>
               <div className="input-group">
                 <input
                   type="number"

@@ -1,9 +1,9 @@
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import Courier, CourierWallet, Delivery, Pricing, User, db
+from models import Courier, CourierWallet, Delivery, Pricing, User, UserWallet, db
 from flask_mail import Mail, Message
 from flask_socketio import SocketIO, emit
-
+from decimal import Decimal  
 # Initialize Flask-Mail and Flask-SocketIO
 mail = Mail()
 socketio = SocketIO(cors_allowed_origins="*")
@@ -52,21 +52,25 @@ def init_courier_routes(app):
 
         # Fetch orders assigned to the courier
         orders = Delivery.query.filter_by(courier_id=courier_id).all()
-        
-        if not orders:
-            return jsonify({'message': 'No orders found for this courier'}), 404
 
-        orders_list = [{
-            'id': order.id,
-            'user_id': order.user_id,
-            'user_first_name': User.query.get(order.user_id).first_name,
-            'description': order.description,
-            'pickup_location': order.pickup_location,
-            'delivery_location': order.delivery_location,
-            'status': order.status,
-            'pricing': float(order.pricing),
-            'distance': float(order.distance)
-        } for order in orders]
+        if not orders:
+            return jsonify({'message': f'No orders found for this courier {courier_id}'}), 404
+
+        orders_list = []
+        for order in orders:
+            user = User.query.get(order.user_id)  # Fetch user details
+            if user:  # Ensure user exists
+                orders_list.append({
+                    'id': order.id,
+                    'user_id': order.user_id,
+                    'customer': f"{user.first_name} {user.last_name}",  # Query first and last name
+                    'description': order.description,
+                    'pickup_location': order.pickup_location,
+                    'delivery_location': order.delivery_location,
+                    'status': order.status,
+                    'pricing': float(order.pricing),
+                    'distance': float(order.distance)
+                })
 
         return jsonify({
             'message': 'Orders retrieved successfully',
@@ -88,6 +92,31 @@ def init_courier_routes(app):
         if new_status not in ['pending', 'in_progress', 'delivered', 'cancelled']:
             return jsonify({'message': 'Invalid status'}), 400
 
+        # Handle refund if order is cancelled
+        if new_status == 'cancelled':
+            courier_wallet = CourierWallet.query.filter_by(courier_id=courier_id).first()
+            user_wallet = UserWallet.query.filter_by(user_id=order.user_id).first()
+
+            if not courier_wallet or not user_wallet:
+                return jsonify({'message': 'Wallets not found'}), 404
+
+            if courier_wallet.balance < order.pricing:
+                return jsonify({'message': 'Insufficient funds in courier wallet'}), 400
+            
+            
+            try:
+                # Perform the refund
+                courier_wallet.balance -= Decimal(str(order.pricing))
+                user_wallet.balance += Decimal(str(order.pricing))
+
+                # Save changes to database
+                db.session.commit()
+                
+            except Exception as e:
+                db.session.rollback()  # Rollback changes if something goes wrong
+                return jsonify({'message': f'Refund failed: {str(e)}'}), 500
+
+        # Update order status
         order.status = new_status
         db.session.commit()
 
@@ -102,9 +131,8 @@ def init_courier_routes(app):
             'new_status': new_status
         }, room=f'user_{order.user_id}')
 
-
         return jsonify({'message': 'Order status updated successfully', 'new_status': order.status}), 200
-    
+
     @app.route('/couriers/orders/<int:order_id>/location', methods=['PATCH'])
     @jwt_required()
     def update_order_location(order_id):
@@ -154,7 +182,7 @@ def init_courier_routes(app):
     
     @app.route('/couriers/pricing', methods=['POST'])
     @jwt_required()
-    def set_pricing(courier_id):
+    def set_pricing():
         courier_id = get_jwt_identity()
 
         data = request.get_json()
