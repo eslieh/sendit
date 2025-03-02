@@ -40,14 +40,14 @@ const api = {
     }
   },
 
-  put: async (endpoint, data) => {
+  patch: async (endpoint, data) => {
     try {
       const token = getToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const response = await apiClient.put(endpoint, data, { headers });
+      const response = await apiClient.patch(endpoint, data, { headers });
       return response.data;
     } catch (error) {
-      console.error(`PUT ${endpoint} failed:`, error.response?.data || error.message);
+      console.error(`PATCH ${endpoint} failed:`, error.response?.data || error.message);
       throw error;
     }
   },

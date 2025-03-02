@@ -1,116 +1,161 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import CauNav from "../../components/CauNav";
+import api from "../../services/api";
+import { useNotify } from "../../services/NotifyContext";
 
 const Deliveries = () => {
-  // Mock Data - Replace with API data
-  const [deliveryRequests, setDeliveryRequests] = useState([
-    { id: 1, customer: "John Doe", pickup: "Westlands", dropoff: "Kilimani", distance: "5.4 km", price: "$3.50", status: "pending" },
-    { id: 2, customer: "Jane Smith", pickup: "CBD", dropoff: "Lavington", distance: "7.2 km", price: "$5.00", status: "pending" },
-  ]);
-  // mod data 3
+  const { id } = useParams();
+  const [deliveryRequests, setDeliveryRequests] = useState([]);
+  const [inTransit, setInTransit] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(null);
+  const [error, setError] = useState(null);
+  const notify = useNotify();
 
-  const [inTransit, setInTransit] = useState([
-    { id: 3, customer: "Mike Ross", pickup: "Ngong Road", dropoff: "Kasarani", distance: "15 km", price: "$8.00", status: "in-transit" },
-    { id: 4, customer: "Rachel Green", pickup: "Parklands", dropoff: "Ruiru", distance: "20 km", price: "$10.50", status: "in-transit" },
-  ]);
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await api.get(`/couriers/orders`);
+        const orders = response.orders;
+        const pendingOrders = orders.filter(order => order.status === "pending");
+        const transitOrders = orders.filter(order => order.status === "in_progress");
 
-  // Accept Delivery Request
-  const acceptRequest = (id) => {
-    const accepted = deliveryRequests.find((delivery) => delivery.id === id);
-    setDeliveryRequests(deliveryRequests.filter((delivery) => delivery.id !== id));
-    setInTransit([...inTransit, { ...accepted, status: "in-transit" }]);
-  };
+        setDeliveryRequests(pendingOrders);
+        setInTransit(transitOrders);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
 
-  // Reject Delivery Request
-  const rejectRequest = (id) => {
-    setDeliveryRequests(deliveryRequests.filter((delivery) => delivery.id !== id));
-  };
-
-  // Mark Delivery as Completed
-  const markAsDelivered = (id) => {
-    setInTransit(inTransit.filter((delivery) => delivery.id !== id));
+  const updateStatus = async (orderId, status) => {
+    setProcessing(orderId);
+    try {
+      const response = await api.patch(`couriers/orders/${orderId}/status`, { status });
+      if (response) {
+        setDeliveryRequests(prev => prev.filter(order => order.id !== orderId));
+        if (status === "in_progress") {
+          const acceptedOrder = deliveryRequests.find(order => order.id === orderId);
+          if (acceptedOrder) setInTransit(prev => [...prev, { ...acceptedOrder, status: "in_progress" }]);
+        }
+        notify("✅ Status update was successful!", false);
+      } else {
+        notify(`⚠ Error: ${response.data?.message || "Failed to update status"}`, true);
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      notify(`❌ Error updating the status: ${error.message}`, true);
+    } finally {
+      setProcessing(null);
+    }
   };
 
   return (
     <div className="main_user_class">
       <CauNav />
       <div className="rest_body_contents">
-        
-        {/* Delivery Requests Table */}
-        <section className="delivery-section">
-          <h2 className="section-title">📦 Delivery Requests</h2>
-          <table className="delivery-table">
-            <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Pickup</th>
-                <th>Drop-off</th>
-                <th>Distance</th>
-                <th>Price</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {deliveryRequests.length > 0 ? (
-                deliveryRequests.map((delivery) => (
-                  <tr key={delivery.id}>
-                    <td>{delivery.customer}</td>
-                    <td>{delivery.pickup}</td>
-                    <td>{delivery.dropoff}</td>
-                    <td>{delivery.distance}</td>
-                    <td>{delivery.price}</td>
-                    <td>
-                      <button className="accept-btn" onClick={() => acceptRequest(delivery.id)}>✔ Accept</button>
-                      <button className="reject-btn" onClick={() => rejectRequest(delivery.id)}>❌ Reject</button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="no-data">No new delivery requests.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </section>
+        {loading && <p>Loading orders...</p>}
+        {error && <p className="error">{error}</p>}
 
-        {/* In Transit Table */}
-        <section className="delivery-section">
-          <h2 className="section-title">🚚 In Transit</h2>
-          <table className="delivery-table">
-            <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Pickup</th>
-                <th>Drop-off</th>
-                <th>Distance</th>
-                <th>Price</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {inTransit.length > 0 ? (
-                inTransit.map((delivery) => (
-                  <tr key={delivery.id}>
-                    <td>{delivery.customer}</td>
-                    <td>{delivery.pickup}</td>
-                    <td>{delivery.dropoff}</td>
-                    <td>{delivery.distance}</td>
-                    <td>{delivery.price}</td>
-                    <td>
-                      <button className="delivered-btn" onClick={() => markAsDelivered(delivery.id)}>✅ Mark as Delivered</button>
-                    </td>
+        {!loading && !error && (
+          <>
+            <section className="delivery-section">
+              <h2 className="section-title">📦 Delivery Requests</h2>
+              <table className="delivery-table">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Pickup</th>
+                    <th>Drop-off</th>
+                    <th>Distance</th>
+                    <th>Price</th>
+                    <th>Actions</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="no-data">No active deliveries.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </section>
+                </thead>
+                <tbody>
+                  {deliveryRequests.length > 0 ? (
+                    deliveryRequests.map(order => (
+                      <tr key={order.id}>
+                        <td>{order.customer}</td>
+                        <td>{order.pickup_location}</td>
+                        <td>{order.delivery_location}</td>
+                        <td>{order.distance} km</td>
+                        <td>KES {order.pricing}</td>
+                        <td>
+                          <button 
+                            className="accept-btn"
+                            disabled={processing === order.id}
+                            onClick={() => updateStatus(order.id, "in_progress")}
+                          >
+                            {processing === order.id ? "Processing..." : "✔ Accept"}
+                          </button>
+                          <button 
+                            className="reject-btn"
+                            disabled={processing === order.id}
+                            onClick={() => updateStatus(order.id, "cancelled")}
+                          >
+                            {processing === order.id ? "Processing..." : "❌ Reject"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="no-data">No new delivery requests.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </section>
 
+            <section className="delivery-section">
+              <h2 className="section-title">🚚 In Transit</h2>
+              <table className="delivery-table">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Pickup</th>
+                    <th>Drop-off</th>
+                    <th>Distance</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inTransit.length > 0 ? (
+                    inTransit.map(order => (
+                      <tr key={order.id}>
+                        <td>{order.customer}</td>
+                        <td>{order.pickup_location}</td>
+                        <td>{order.delivery_location}</td>
+                        <td>{order.distance} km</td>
+                        <td>KES {order.pricing}</td>
+                        <td>
+                          <button 
+                            className="delivered-btn"
+                            disabled={processing === order.id}
+                            onClick={() => updateStatus(order.id, "delivered")}
+                          >
+                            {processing === order.id ? "Processing..." : "✅ Mark as Delivered"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="no-data">No active deliveries.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </section>
+          </>
+        )}
       </div>
     </div>
   );
