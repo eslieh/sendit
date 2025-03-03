@@ -15,9 +15,10 @@ const Company = () => {
       try {
         const response = await api.get("/wallet/courier/balance");
         setWalletBalance(response.balance);
+        notify("fetched", false)
       } catch (error) {
         console.error("Error fetching wallet balance:", error);
-        notify("Failed to load wallet balance.", false);
+        notify("Failed to load wallet balance.", true);
       } finally {
         setLoadingWallet(false);
       }
@@ -34,7 +35,7 @@ const Company = () => {
         setPricePerKm(response.price_per_km);
       } catch (error) {
         console.error("Error fetching price per km:", error);
-        notify("Failed to load price per km.", false);
+        notify("Failed to load price per km.", true);
       } finally {
         setLoadingPrice(false);
       }
@@ -57,10 +58,10 @@ const Company = () => {
       const response = await api.post("/couriers/pricing", formData);
       setPricePerKm(response.price_per_km);
       setNewPrice("");
-      notify("Price per KM updated successfully!", true);
+      notify("Price per KM updated successfully!", false);
     } catch (error) {
       console.error("Error updating price:", error);
-      notify("Failed to update price. Try again.", false);
+      notify("Failed to update price. Try again.", true);
     }
   };
 
