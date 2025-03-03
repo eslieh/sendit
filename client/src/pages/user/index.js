@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Usernav from "../../components/Usernav";
 import api from "../../services/api";
 import TransitDeliveries from "../../components/TransitDeliveries";
+import { useNavigate } from "react-router-dom";
 const UserHome = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [pickupLocation, setPickupLocation] = useState("");
@@ -12,9 +13,17 @@ const UserHome = () => {
   const [error, setError] = useState("");
   const [loading_result, SetLoadingResults] = useState(true);
   const [quotes, setQuotes] = useState(null);
+  const navigate = useNavigate()
   const handleModalToggle = () => {
     setModalOpen(!modalOpen);
   };
+  
+  useEffect(() => {
+    const accessToken = sessionStorage.getItem('access_token');
+    if (!accessToken) {
+      navigate('/auth');
+    }
+  }, []);
 
   // Geocode function to convert location to lat/lng using Nominatim API
   const geocodeLocation = async (address) => {

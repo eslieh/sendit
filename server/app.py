@@ -21,15 +21,12 @@ app.config["JWT_SECRET_KEY"] = 'your_jwt_secret_key'
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
 
-# Looking to send emails in production? Check out our Email API/SMTP product!
-app.config['MAIL_SERVER']='sandbox.smtp.mailtrap.io'
-app.config['MAIL_PORT'] = 2525
-app.config['MAIL_USERNAME'] = '33acddabb956ce'
-app.config['MAIL_PASSWORD'] = 'd35c5b47062eae'
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-
-
+app.config['MAIL_USERNAME'] = 'victoreslieh@gmail.com'
+app.config['MAIL_PASSWORD'] = 'drfx rbkz auvy sguh'
+app.config['MAIL_DEFAULT_SENDER'] = 'victoreslieh@gmail.com'
 
 jwt = JWTManager(app)
 db.init_app(app)

@@ -268,7 +268,7 @@ SendIt Courier Team"""
 
 def send_email(email, subject, body):
     """Sends an email with the given subject and body"""
-    msg = Message(subject, sender="SendIt@courierapp.com", recipients=[email])
+    msg = Message(subject, sender="victoreslieh@gmail.com", recipients=[email])
     msg.body = body
     
     try:

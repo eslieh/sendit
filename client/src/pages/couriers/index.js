@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import CauNav from "../../components/CauNav";
 import "./couriers.css";
 import api from "../../services/api";
+import { useNavigate } from "react-router-dom";
 const CourierIndex = () => {
   const [stats, setStats] = useState({
     active_deliveries: 0,
@@ -10,7 +11,13 @@ const CourierIndex = () => {
     total_distance_covered: 0.0,
     total_earnings: 0.0,
   });
-
+  const navigate = useNavigate()
+  useEffect(() => {
+    const accessToken = sessionStorage.getItem('access_token');
+    if (!accessToken) {
+      navigate('/auth?ref=courier');
+    }
+  }, []);
   useEffect(() => {
     const fetchCourierStats = async () => {
       try {
