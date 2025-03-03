@@ -24,11 +24,9 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'your-email@gmail.com'
-app.config['MAIL_PASSWORD'] = 'your-app-password'
-app.config['MAIL_DEFAULT_SENDER'] = 'your-email@gmail.com'
-
-
+app.config['MAIL_USERNAME'] = 'victoreslieh@gmail.com'
+app.config['MAIL_PASSWORD'] = 'drfx rbkz auvy sguh'
+app.config['MAIL_DEFAULT_SENDER'] = 'victoreslieh@gmail.com'
 
 jwt = JWTManager(app)
 db.init_app(app)
