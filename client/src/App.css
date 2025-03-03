@@ -452,6 +452,7 @@ iframe.gmap_iframe {
   padding-left: 8%;
 }
 
+
 .rest_body_contents {
   position: absolute;
   left: 22%;
@@ -462,8 +463,22 @@ iframe.gmap_iframe {
   box-shadow: 0 0 3px gray;
   border-radius: 15px;
   padding: 12px;
+  overflow: auto;
 }
 
+div#metadata {
+  position: absolute;
+  margin-top: -31vh;
+  margin-left: 30px;
+  box-shadow: 0 0 16px gray;
+  background: #ffffffbd;
+}
+
+.dejkr {
+  margin-top: 24px;
+  font-weight: 900;
+  font-size: 25px;
+}
 button.sendapkg:hover {
   transition: all ease 0.8s;
   background: #00b560;
@@ -519,6 +534,11 @@ button.sendapkg {
   transition: all ease 0.4s;
   margin-left: 11px;
 }
+
+.nav-tab.active {
+  background: #00000094;
+  color: white;
+}
 .modal-content {
   display: grid;
   gap: 4px;
@@ -563,13 +583,24 @@ img.main-image {
   width: 100%;
   min-height: 48vh;
 }
-
+.delivery_quotes:hover {
+  transition: all ease 0.9s;
+  transform: scale(1.01);
+  cursor: pointer;
+  background: black;
+  color: white;
+}
 .delivery_quotes {
   display: flex
 ;
   gap: 8px;
+  padding: 5px;
+  background: #ededed;
+  width: fit-content;
+  margin-top: 4px;
+  border-radius: 10px;
+  transition: all ease 0.9s;
 }
-
 .courier_icon_info {
   width: 48px;
   height: 48px;
@@ -593,6 +624,73 @@ img.main-image {
 .nav-tabs {
   display: grid;
   gap: 4px;
+}
+
+iframe.maps_full.mail {
+  width: 100%;
+  height: 79vh;
+  margin-top: 6px;
+  border-radius: 18px;
+  box-shadow: 0 0 4px gray;
+}
+.other_transit_views {
+  display: flex
+;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.transit_view:hover {
+  transition: all ease 0.8s;
+  box-shadow: 0 0 11px #80808085;
+  transform: scale(1.04);
+  background: #fffefe4d;
+  cursor: pointer;
+}
+.transit_view {
+  width: 350px;
+  background: white;
+  padding: 27px;
+  border-radius: 13px;
+  box-shadow: 0 0 1px #8080805e;
+  transition: all ease 0.8s;
+}
+
+.delivery_description {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.locationr {
+  display: flex
+;
+  gap: 5px;
+}
+
+.icon_hsold {
+  width: 19px;
+}
+
+.location_ns {
+  font-size: 18px;
+  font-weight: 500;
+  color: #464646;
+}
+
+.line_holderd {
+  border-left: 5px solid black;
+  margin-left: 5px;
+}
+
+.line_holderd .status {
+  text-align: start;
+  color: #0db76b;
+}
+
+.price_dists {
+  font-size: 18px;
+  font-weight: 900;
+  color: #1a1a1a;
 }
 @media screen and (max-width: 600px) {
   img.main_icon {

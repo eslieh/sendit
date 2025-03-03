@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Usernav from "../../components/Usernav";
 import api from "../../services/api";
+import TransitDeliveries from "../../components/TransitDeliveries";
+import { useNavigate } from "react-router-dom";
 const UserHome = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [pickupLocation, setPickupLocation] = useState("");
@@ -11,9 +13,17 @@ const UserHome = () => {
   const [error, setError] = useState("");
   const [loading_result, SetLoadingResults] = useState(true);
   const [quotes, setQuotes] = useState(null);
+  const navigate = useNavigate()
   const handleModalToggle = () => {
     setModalOpen(!modalOpen);
   };
+  
+  useEffect(() => {
+    const accessToken = sessionStorage.getItem('access_token');
+    if (!accessToken) {
+      navigate('/auth');
+    }
+  }, []);
 
   // Geocode function to convert location to lat/lng using Nominatim API
   const geocodeLocation = async (address) => {
@@ -84,6 +94,36 @@ const UserHome = () => {
       setLoading(false);
     }
   };
+  const requestsDelivery = async (id) => {
+    const authorise = alert("Are you sure?")
+    const endpoint = '/orders';
+    const deliverly = {
+      courier_id: id,
+      description: packageDescription,
+      pickup_location: pickupLocation,
+      delivery_location: deliveryLocation, 
+      distance: distance
+    };
+  
+    try {
+      const response = await api.post(endpoint, deliverly);
+      
+      const responseMessage = response?.message || "No response message";
+  
+      alert(responseMessage);
+  
+      if (responseMessage !== "Order created successfully") {
+        alert(responseMessage);
+      } else {
+        console.log("Delivery request was successful");
+        // You can add further logic here (e.g., redirect or update UI)
+      }
+    } catch (err) {
+      console.error("Delivery request failed:", err);
+      setError("Failed to request delivery");
+    }
+  };
+  
   return (
     <div className="main_user_class">
       <Usernav />
@@ -144,7 +184,7 @@ const UserHome = () => {
                 ) : (
                   <div className="deliverly_results">
                     {quotes.map((courier) => (
-                      <div className="delivery_quotes" onClick={() => console.log(`courier id${courier.courier_name} was clicked`)}>
+                      <div className="delivery_quotes" onClick={() => requestsDelivery(courier.courier_id)}>
                         <div className="courier_icon_info">
                           <i className="fa-solid fa-truck"></i>
                         </div>
@@ -166,6 +206,9 @@ const UserHome = () => {
               </div>
             </div>
           )}
+        </div>
+        <div className="current_deliveries">
+          <TransitDeliveries/>
         </div>
       </div>
     </div>

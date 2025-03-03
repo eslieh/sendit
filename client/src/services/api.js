@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for your API
-const API_BASE_URL = 'https://sendit-5-2epe.onrender.com'; // Change to your actual backend URL
+const API_BASE_URL = 'https://sendit-7-bndx.onrender.com'; // Change to your actual backend URL
 
 // Create an Axios instance
 const apiClient = axios.create({
@@ -40,14 +40,14 @@ const api = {
     }
   },
 
-  put: async (endpoint, data) => {
+  patch: async (endpoint, data) => {
     try {
       const token = getToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const response = await apiClient.put(endpoint, data, { headers });
+      const response = await apiClient.patch(endpoint, data, { headers });
       return response.data;
     } catch (error) {
-      console.error(`PUT ${endpoint} failed:`, error.response?.data || error.message);
+      console.error(`PATCH ${endpoint} failed:`, error.response?.data || error.message);
       throw error;
     }
   },

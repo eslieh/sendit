@@ -1,31 +1,32 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const navTabs = [
   {
     name: "Home",
-    icon: <i className="fa-solid fa-house"></i>,  // Home icon
+    icon: <i className="fa-solid fa-house"></i>, // Home icon
     link: "/courier",
   },
   {
     name: "Deliveries",
-    icon: <i className="fa-solid fa-box"></i>,  // Deliveries icon
+    icon: <i className="fa-solid fa-box"></i>, // Deliveries icon
     link: "/courier/deliveries",
   },
   {
     name: "History",
-    icon: <i className="fa-solid fa-clock-rotate-left"></i>,  // History icon
+    icon: <i className="fa-solid fa-clock-rotate-left"></i>, // History icon
     link: "/courier/history",
   },
   {
     name: "Company",
-    icon: <i className="fa-solid fa-building"></i>,  // Company icon
+    icon: <i className="fa-solid fa-building"></i>, // Company icon
     link: "/courier/company",
   },
 ];
 
 const CauNav = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // Get current route
 
   return (
     <div className="nav-main-container">
@@ -40,7 +41,10 @@ const CauNav = () => {
       <nav className="navigation_routes">
         <div className="nav-tabs">
           {navTabs.map((tab, index) => (
-            <div key={index} className="nav-tab">
+            <div
+              key={index}
+              className={`nav-tab ${location.pathname === tab.link ? "active" : ""}`} // Add active class
+            >
               <Link to={tab.link} className="nav-link">
                 {tab.icon} <span>{tab.name}</span>
               </Link>

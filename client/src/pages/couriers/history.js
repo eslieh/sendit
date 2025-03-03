@@ -1,14 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CauNav from "../../components/CauNav";
-
+import api from "../../services/api";
 const History = () => {
-  // Mock Data - Replace with API data
-  const [deliveryHistory, setDeliveryHistory] = useState([
-    { id: 1, customer: "John Doe", pickup: "Westlands", dropoff: "Kilimani", distance: "5.4 km", price: "$3.50", status: "Delivered" },
-    { id: 2, customer: "Jane Smith", pickup: "CBD", dropoff: "Lavington", distance: "7.2 km", price: "$5.00", status: "Delivered" },
-    { id: 3, customer: "Mike Ross", pickup: "Ngong Road", dropoff: "Kasarani", distance: "15 km", price: "$8.00", status: "Canceled" },
-    { id: 4, customer: "Rachel Green", pickup: "Parklands", dropoff: "Ruiru", distance: "20 km", price: "$10.50", status: "Delivered" },
-  ]);
+  const [deliveryHistory, setDeliveryHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const response = await api.get("/couriers/orders"); // Replace with your API URL
+        const data = response.orders;
+        setDeliveryHistory(data);
+      } catch (error) {
+        console.error("Error fetching delivery history:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, []);
 
   return (
     <div className="main_user_class">
@@ -16,36 +27,40 @@ const History = () => {
       <div className="rest_body_contents">
         <h2 className="section-title">📜 Delivery History</h2>
 
-        <table className="history-table">
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Pickup</th>
-              <th>Drop-off</th>
-              <th>Distance</th>
-              <th>Price</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {deliveryHistory.length > 0 ? (
-              deliveryHistory.map((delivery) => (
-                <tr key={delivery.id} className={delivery.status === "Canceled" ? "canceled-row" : ""}>
-                  <td>{delivery.customer}</td>
-                  <td>{delivery.pickup}</td>
-                  <td>{delivery.dropoff}</td>
-                  <td>{delivery.distance}</td>
-                  <td>{delivery.price}</td>
-                  <td className={`status ${delivery.status.toLowerCase()}`}>{delivery.status}</td>
-                </tr>
-              ))
-            ) : (
+        {loading ? (
+          <p>Loading history...</p>
+        ) : (
+          <table className="history-table">
+            <thead>
               <tr>
-                <td colSpan="6" className="no-data">No delivery history available.</td>
+                <th>Customer</th>
+                <th>Pickup</th>
+                <th>Drop-off</th>
+                <th>Distance</th>
+                <th>Price</th>
+                <th>Status</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {deliveryHistory.length > 0 ? (
+                deliveryHistory.map((delivery) => (
+                  <tr key={delivery.id} className={delivery.status === "cancelled" ? "canceled-row" : ""}>
+                    <td>{delivery.customer}</td>
+                    <td>{delivery.pickup_location}</td>
+                    <td>{delivery.delivery_location}</td>
+                    <td>{delivery.distance} km</td>
+                    <td>KES {delivery.pricing}</td>
+                    <td className={`status ${delivery.status.toLowerCase()}`}>{delivery.status}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="no-data">No delivery history available.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

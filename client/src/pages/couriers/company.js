@@ -1,26 +1,76 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CauNav from "../../components/CauNav";
-
+import api from "../../services/api"; // Axios instance
+import { useNotify } from "../../services/NotifyContext";
 const Company = () => {
-  // Mock Data - Replace with API Data
-  const [walletBalance, setWalletBalance] = useState(500.0); // Example balance
-  const [pricePerKm, setPricePerKm] = useState(1.5); // Example price per km
+  const [walletBalance, setWalletBalance] = useState(0.0);
+  const [pricePerKm, setPricePerKm] = useState(0.0);
   const [newPrice, setNewPrice] = useState("");
+  const [loadingWallet, setLoadingWallet] = useState(true);
+  const [loadingPrice, setLoadingPrice] = useState(true);
+  const notify = useNotify()
+  // Fetch Wallet Balance
+  useEffect(() => {
+    const fetchWalletBalance = async () => {
+      try {
+        const response = await api.get("/wallet/courier/balance");
+        setWalletBalance(response.balance);
+        notify("fetched", false)
+      } catch (error) {
+        console.error("Error fetching wallet balance:", error);
+        notify("Failed to load wallet balance.", true);
+      } finally {
+        setLoadingWallet(false);
+      }
+    };
 
-  // Handle Price Update
-  const handleUpdatePrice = () => {
-    if (newPrice && !isNaN(newPrice) && newPrice > 0) {
-      setPricePerKm(parseFloat(newPrice));
+    fetchWalletBalance();
+  }, []);
+
+  // Fetch Price Per KM
+  useEffect(() => {
+    const fetchPricePerKm = async () => {
+      try {
+        const response = await api.get("/couriers/pricing");
+        setPricePerKm(response.price_per_km);
+      } catch (error) {
+        console.error("Error fetching price per km:", error);
+        notify("Failed to load price per km.", true);
+      } finally {
+        setLoadingPrice(false);
+      }
+    };
+
+    fetchPricePerKm();
+  }, []);
+
+  // Update Price Per KM
+  const handleUpdatePrice = async () => {
+    if (!newPrice || isNaN(newPrice) || parseFloat(newPrice) <= 0) {
+      // notify("Enter a valid price!", false);
+      // return;
+    }
+
+    try {
+      const formData = {
+        price_per_km: parseFloat(newPrice),
+      }
+      const response = await api.post("/couriers/pricing", formData);
+      setPricePerKm(response.price_per_km);
       setNewPrice("");
-      alert("Price per KM updated successfully!");
-    } else {
-      alert("Enter a valid price!");
+      notify("Price per KM updated successfully!", false);
+    } catch (error) {
+      console.error("Error updating price:", error);
+      notify("Failed to update price. Try again.", true);
     }
   };
 
-  // Handle Logout
+  // Logout
   const handleLogout = () => {
-    alert("Logging out..."); // Replace with actual logout logic
+    sessionStorage.removeItem("userToken");
+    localStorage.removeItem("userToken");
+    notify("Logging out...", true);
+    window.location.href = "/auth";
   };
 
   return (
@@ -30,22 +80,32 @@ const Company = () => {
         {/* Wallet Section */}
         <div className="wallet-section">
           <h2>💰 Company Wallet</h2>
-          <p>Balance: <span>${walletBalance.toFixed(2)}</span></p>
+          {loadingWallet ? (
+            <p>Loading wallet balance...</p>
+          ) : (
+            <p>Balance: <span>KES {walletBalance.toFixed(2)}</span></p>
+          )}
         </div>
 
         {/* Pricing Update Section */}
         <div className="pricing-section">
           <h2>📌 Set Price Per KM</h2>
-          <p>Current Rate: <strong>${pricePerKm.toFixed(2)}</strong> per km</p>
-          <div className="input-group">
-            <input
-              type="number"
-              placeholder="Enter new price"
-              value={newPrice}
-              onChange={(e) => setNewPrice(e.target.value)}
-            />
-            <button onClick={handleUpdatePrice}>Update Price</button>
-          </div>
+          {loadingPrice ? (
+            <p>Loading price per km...</p>
+          ) : (
+            <>
+              <p>Current Rate: <strong>KES {pricePerKm.toFixed(2)}</strong> per km</p>
+              <div className="input-group">
+                <input
+                  type="number"
+                  placeholder="Enter new price"
+                  value={newPrice}
+                  onChange={(e) => setNewPrice(e.target.value)}
+                />
+                <button onClick={handleUpdatePrice}>Update Price</button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Logout Section */}
