@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for your API
-const API_BASE_URL = 'http://127.0.0.1:5000'; // Change to your actual backend URL
+const API_BASE_URL = 'https://sendit-7-bndx.onrender.com'; // Change to your actual backend URL
 
 // Create an Axios instance
 const apiClient = axios.create({
