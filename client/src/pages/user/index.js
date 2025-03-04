@@ -52,7 +52,7 @@ const UserHome = () => {
 
       // Call OSRM API for route
       const routeResponse = await fetch(
-        `http://router.project-osrm.org/route/v1/driving/${pickupCoords.lon},${pickupCoords.lat};${deliveryCoords.lon},${deliveryCoords.lat}?overview=false`
+        `https://router.project-osrm.org/route/v1/driving/${pickupCoords.lon},${pickupCoords.lat};${deliveryCoords.lon},${deliveryCoords.lat}?overview=false`
       );
       const routeData = await routeResponse.json();
       if (!routeData.routes || routeData.routes.length === 0) {
