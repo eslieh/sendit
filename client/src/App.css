@@ -385,6 +385,11 @@ img.auth_image_conts {
   background: #009829;
 }
 
+.main_user_class {
+  display: flex
+;
+  gap: 4px;
+}
 .authenticator_form input {
   border: navajowhite;
   padding-top: 29px;
@@ -423,16 +428,12 @@ iframe.gmap_iframe {
 }
 
 .nav-main-container {
-  position: absolute;
-  top: 0;
   z-index: 5;
-  background: #f7f9f8;
+  background: transparent;
   height: 97%;
   margin: 9px;
   border-radius: 15px;
-  box-shadow: 0 0 3px gray;
-  width: 19%;
-  min-width: 300px;
+  width: 17%;
 }
 
 .fnamee-d {
@@ -452,28 +453,24 @@ iframe.gmap_iframe {
   padding-left: 8%;
 }
 
-
 .rest_body_contents {
-  position: absolute;
-  left: 22%;
-  top: 8%;
-  background: transparent;
-  width: 77%;
-  height: 91%;
-  box-shadow: 0 0 3px gray;
+  margin-top: 2%;
+  background: #ffffff;
+  width: 81%;
+  height: 94vh;
+  box-shadow: 0 0 17px #8080801f;
   border-radius: 15px;
   padding: 12px;
   overflow: auto;
 }
 
 div#metadata {
-  position: absolute;
+  position: relative;
   margin-top: -31vh;
   margin-left: 30px;
   box-shadow: 0 0 16px gray;
   background: #ffffffbd;
 }
-
 .dejkr {
   margin-top: 24px;
   font-weight: 900;
@@ -515,10 +512,8 @@ button.sendapkg {
 .nav-tab a i {
   width: 31px;
 }
-
 .nav-tab:hover {
-  background: black;
-  color: white;
+  background: #dcdedd78;
   transition: all ease 0.4s;
 }
 .nav-link.active {
@@ -536,12 +531,20 @@ button.sendapkg {
 }
 
 .nav-tab.active {
-  background: #00000094;
-  color: white;
+  background: #0000001c;
+  color: black;
 }
 .modal-content {
   display: grid;
   gap: 4px;
+}
+
+.nav-tab.active a.nav-link span {
+  font-weight: 600;
+}
+a.nav-link span {
+  font-size: 17px;
+  font-weight: 400;
 }
 img.main-image {
   width: 146px;
@@ -692,6 +695,27 @@ iframe.maps_full.mail {
   font-weight: 900;
   color: #1a1a1a;
 }
+@media screen and (max-width: 748px){
+  
+a.nav-link {
+  display: grid
+;
+}
+
+.walletdet {
+  background: linear-gradient(45deg, #009829, #00ff88);
+  padding: 24px;
+  display: grid
+;
+  place-content: center;
+  width: 29%;
+  border-radius: 17px;
+}
+
+a.nav-link span {
+  font-size: 14px;
+}
+}
 @media screen and (max-width: 600px) {
   img.main_icon {
     width: 122px;
@@ -776,6 +800,93 @@ iframe.maps_full.mail {
     color: #eceeed;
   }
 
+
+  .nav-main-container {
+    position: fixed;
+    bottom: 0%;
+    width: 100%;
+    height: 11vh;
+    padding: 0px;
+    margin: 0;
+    backdrop-filter: blur(23px);
+}
+.nav-tabs {
+  display: flex
+;
+}
+
+button.sendapkg {
+  padding: 9px;
+  border-radius: 20px;
+  width: 57%;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all ease 0.8s;
+  background: #009829;
+  color: white;
+}
+
+.fnamee-d {
+  display: none;
+}
+
+div#metadata {
+  position: relative;
+  margin-top: -31vh;
+  margin-left: 14px;
+  box-shadow: 0 0 16px gray;
+  background: #ffffffbd;
+}
+.transit_view {
+  width: 50%;
+  background: white;
+  padding: 27px;
+  border-radius: 13px;
+  box-shadow: 0 0 1px #8080805e;
+  transition: all ease 0.8s;
+}
+
+.location_ns {
+  font-size: 12px;
+  font-weight: 500;
+  color: #464646;
+}
+
+.delivery_description {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.price_dists {
+  font-size: 14px;
+  font-weight: 900;
+  color: #1a1a1a;
+}
+
+.line_holderd .status {
+  text-align: start;
+  color: #0db76b;
+  font-size: 14px;
+  margin-left: 5px;
+}
+.rest_body_contents {
+  margin-top: 2%;
+  background: #ffffff;
+  width: 98%;
+  height: fit-content;
+  box-shadow: 0 0 17px #8080801f;
+  border-radius: 15px;
+  padding: 12px;
+  margin-left: 1%;
+  min-height: 100vh;
+  margin-bottom: 16vh;
+}
+
+img.main-image {
+    display: none;
+}
   span.mission_data {
     font-size: 13px;
     font-weight: 500;

@@ -25,7 +25,6 @@ const Usernav = () => {
 
   return (
     <div className="nav-main-container">
-      <div className="fnamee-d">Eslieh</div>
       <div className="image-held">
         <img
           src="/senditmain.png"

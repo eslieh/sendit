@@ -41,13 +41,15 @@
     margin-bottom: 20px;
   }
   
-  .stat-card {
-    background: #ffffff;
-    padding: 40px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
+  
+.stat-card {
+  background: #dcdedd30;
+  padding: 40px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
   
   .stat-title {
     font-size: 14px;
