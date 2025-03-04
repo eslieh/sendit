@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-<<<<<<< HEAD
 alembic = "==1.14.1"
 aniso8601 = "==10.0.0"
 bcrypt = "==4.2.1"
@@ -35,20 +34,8 @@ sqlalchemy-serializer = "==1.4.12"
 typing-extensions = "==4.12.2"
 werkzeug = "==3.0.6"
 zipp = "==3.20.2"
-=======
-flask-cors = "*"
-flask-jwt-extended = "*"
-flask-bcrypt = "*"
-flask = "*"
-gunicorn = "*"
-psycopg2-binary = "*"
-flask-sqlalchemy = "*"
-flask-migrate = "*"
-sqlalchemy-serializer = "*"
-flask-restful = "*"
 flask-mail = "*"
 flask-socketio = "*"
->>>>>>> 1f2a453733b7c1ba0452da7cec37ef376109dc50
 
 [dev-packages]
 
