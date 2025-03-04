@@ -134,54 +134,31 @@ def init_order_routes(app):
 
     @app.route('/orders/<int:order_id>', methods=['PATCH'])
     @jwt_required()
-    def update_delivery_details(order_id):
+    def update_delivery_location(order_id):
         user_id = get_jwt_identity()
         data = request.get_json()
-
+        
         new_location = data.get('delivery_location')
-<<<<<<< HEAD
-        new_distance = data.get('distance')
-
-        if not new_location:
-            return jsonify({'message': 'New delivery location is required'}), 400
-
-        if new_distance is None or not isinstance(new_distance, (int, float)) or new_distance <= 0:
-            return jsonify({'message': 'Invalid distance value'}), 400
-
-=======
         new_distance = data.get('new_distance')
         new_price = data.get('new_price')
 
         if not new_location or new_distance is None or new_price is None:
             return jsonify({'message': 'Delivery location, new distance, and new price are required'}), 400
         
->>>>>>> faith-backend
         order = Delivery.query.filter_by(id=order_id, user_id=user_id).first()
-
+        
         if not order:
             return jsonify({'message': 'Order not found or unauthorized'}), 404
-
+        
         if order.status == 'delivered':
             return jsonify({
-                'message': 'Order details cannot be updated',
+                'message': 'Order destination cannot be updated',
                 'current_status': order.status,
                 'reason': 'Only non-delivered orders can be updated'
             }), 400
-
+        
         try:
-            # Fetch the courier's pricing per km
-            courier_pricing = Pricing.query.filter_by(courier_id=order.courier_id).first()
-            if not courier_pricing:
-                return jsonify({'message': 'Courier pricing not found'}), 404
-
-            # Calculate new pricing based on updated distance
-            new_pricing = float(new_distance) * float(courier_pricing.price_per_km)
-
             old_location = order.delivery_location
-<<<<<<< HEAD
-            old_distance = order.distance
-            old_pricing = order.pricing
-=======
             old_price = order.pricing
 
             # Get user and courier wallets
@@ -209,51 +186,31 @@ def init_order_routes(app):
 
                 courier_wallet.balance -= Decimal(str(refund_amount))
                 user_wallet.balance += Decimal(str(refund_amount))
->>>>>>> faith-backend
 
             # Update order details
             order.delivery_location = new_location
             order.distance = new_distance
-<<<<<<< HEAD
-            order.pricing = new_pricing
-
-=======
             order.pricing = new_price
 
             # Commit transaction
->>>>>>> faith-backend
             db.session.commit()
 
             return jsonify({
-                'message': 'Delivery details updated successfully',
+                'message': 'Delivery location updated successfully',
                 'order': {
                     'id': order.id,
                     'old_location': old_location,
                     'new_location': new_location,
-<<<<<<< HEAD
-                    'old_distance': float(old_distance),
-                    'new_distance': float(new_distance),
-                    'old_pricing': float(old_pricing),
-                    'new_pricing': float(new_pricing),
-=======
                     'old_price': old_price,
                     'new_price': new_price,
                     'price_difference': price_difference,
->>>>>>> faith-backend
                     'status': order.status
                 }
             }), 200
 
         except Exception as e:
             db.session.rollback()
-<<<<<<< HEAD
-            return jsonify({'message': 'Error updating order details', 'error': str(e)}), 500
-
-
-
-=======
             return jsonify({'message': 'Error updating delivery location', 'error': str(e)}), 500
->>>>>>> faith-backend
     @app.route('/orders', methods=['GET'])
     @jwt_required()
     def get_user_orders():
