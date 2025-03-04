@@ -109,7 +109,7 @@ const UserHome = () => {
       const response = await api.post(endpoint, deliverly);
       
       const responseMessage = response?.message || "No response message";
-  
+      navigate('/user/deliveries')
       alert(responseMessage);
   
       if (responseMessage !== "Order created successfully") {
