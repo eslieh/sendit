@@ -29,7 +29,7 @@ const Landing = () => {
       icon: <i className="fa-solid fa-user"></i>, // Changed icon to user
       title: "Join as a User", // Updated title
       description: "Order parcels and track deliveries easily", // Updated description
-      role: "user"
+      role: "user",
     },
   ];
 
@@ -38,12 +38,25 @@ const Landing = () => {
     percels:
       "https://images.pexels.com/photos/7843956/pexels-photo-7843956.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
     services: {
-      percel:
-        "https://i.pinimg.com/736x/e5/4f/0c/e54f0c109edb5b7ef8e214be45c1988d.jpg",
-      tracking:
-        "https://i.pinimg.com/736x/ba/f1/c3/baf1c39ca4699f943a2121eadbb39714.jpg",
-      order:
-        "https://i.pinimg.com/736x/9b/0b/d4/9b0bd42192135f58a051ebb2b1c5e02f.jpg",
+      percel: {
+        image:
+          "https://i.pinimg.com/736x/e5/4f/0c/e54f0c109edb5b7ef8e214be45c1988d.jpg",
+        details: ["Fast delivery", "Affordable rates", "Secure handling"],
+      },
+      tracking: {
+        image:
+          "https://i.pinimg.com/736x/ba/f1/c3/baf1c39ca4699f943a2121eadbb39714.jpg",
+        details: ["Live tracking", "ETA updates", "24/7 Support"],
+      },
+      order: {
+        image:
+          "https://i.pinimg.com/736x/9b/0b/d4/9b0bd42192135f58a051ebb2b1c5e02f.jpg",
+        details: [
+          "Easy ordering",
+          "Multiple payment options",
+          "Scheduled deliveries",
+        ],
+      },
     },
     final:
       "https://i.pinimg.com/736x/ca/77/26/ca7726b4d6696adee7c1991e11701363.jpg",
@@ -57,7 +70,9 @@ const Landing = () => {
             className="main_icon"
             src={imagesFrontend.logo}
             alt="Sendit Logo"
-            onClick={() => {navigate('/')}}
+            onClick={() => {
+              navigate("/");
+            }}
           />
         </div>
         <div className="right_flex_icon">
@@ -74,14 +89,17 @@ const Landing = () => {
       {menuOpen && (
         <div className="hamburger_menu">
           {menuItems.map((item, index) => (
-            <div key={index} className="menu-item"
-            onClick={() => {
-              if(item.role == "user"){
-                navigate('/auth')
-              }else{
-                navigate('flex')
-              }
-            }}>
+            <div
+              key={index}
+              className="menu-item"
+              onClick={() => {
+                if (item.role == "user") {
+                  navigate("/auth");
+                } else {
+                  navigate("flex");
+                }
+              }}
+            >
               {item.icon}
               <div className="menu-text">
                 <h4>{item.title}</h4>
@@ -95,10 +113,13 @@ const Landing = () => {
       <div className="half-flex-name">
         <div className="center_main_name">
           <p className="Senditp_par">Sendit</p>
-          <span>Send wherever. Whenever.</span>
+          <div className="landingtext">
+            <h3 className="span2">Send wherever.</h3>
+            <h3 className="span3">Whenever.</h3>
+          </div>
         </div>
       </div>
-
+      <div className="emptysscre"></div>
       <div className="full_main_images">
         <img
           className="main_full_img"
@@ -124,13 +145,18 @@ const Landing = () => {
                     <h1 className="hover_head">
                       {key.replace(/^\w/, (c) => c.toUpperCase())}
                     </h1>
-                    <div className="ride_detail">Deliver parcels instantly</div>
+                    {/* Dynamic ride details */}
+                    {value.details.map((detail, index) => (
+                      <div className="ride_detail" key={index}>
+                        {detail}
+                      </div>
+                    ))}
                     <a href="auth/">
                       <div className="get-starteds">Get Started</div>
                     </a>
                   </div>
                 </div>
-                <img className="image_holderd" src={value} alt={key} />
+                <img className="image_holderd" src={value.image} alt={key} />
               </div>
             ))}
           </div>

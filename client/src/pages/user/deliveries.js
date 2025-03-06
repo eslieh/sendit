@@ -121,7 +121,7 @@ const DeliveriesUser = () => {
                   <td>{order.description}</td>
                   <td>{order.pickup_location}</td>
                   <td>
-                    {order.status === "pending" ? (
+                    {order.status != "delivered" ? (
                       <input
                         type="text"
                         defaultValue={order.delivery_location}

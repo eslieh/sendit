@@ -182,7 +182,8 @@ const UserHome = () => {
                 {loading_result ? (
                   <div className="results_loading">loading_quote</div>
                 ) : (
-                  <div className="deliverly_results">
+                  <div className="detaillll">
+                    <div className="deliverly_results">
                     {quotes.map((courier) => (
                       <div className="delivery_quotes" onClick={() => requestsDelivery(courier.courier_id)}>
                         <div className="courier_icon_info">
@@ -201,6 +202,13 @@ const UserHome = () => {
                         </div>
                       </div>
                     ))}
+                    
+                  </div>
+                   <iframe
+                   className="flex-right-map"
+                   frameBorder="0"
+                   src={`https://www.google.com/maps/embed/v1/directions?origin=${pickupLocation}&destination=${deliveryLocation}&key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`}
+                 ></iframe>
                   </div>
                 )}
               </div>

@@ -48,10 +48,10 @@ const Flex = () => {
     final:
       "https://i.pinimg.com/736x/ca/77/26/ca7726b4d6696adee7c1991e11701363.jpg",
   };
-
+  
   return (
     <div className="sendit_landing">
-      <div className={`sendit_home_top ${showNavbar ? "show" : "hide"}`}>
+      <div className={`sendit_home_top`}>
         <div className="sendit_flex_icon">
           <img
             className="main_icon"

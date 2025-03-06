@@ -110,7 +110,7 @@
   
 button.cancel-btn:hover {
   transition: all ease 0.8s;
-  transform: scale(1.5);
+  transform: scale(1.06);
   cursor: pointer;
   background: red;
   color: white;
