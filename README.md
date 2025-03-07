@@ -26,7 +26,7 @@ Make sure you have the following installed:
 ### Backend Setup (Flask API)
 ```sh
 # Clone the repo
-git clone https://github.com/yourusername/sendit.git
+git clone https://github.com/eslieh/sendit.git
 cd sendit/backend
 
 # Create a virtual environment
@@ -74,7 +74,7 @@ Pull requests are welcome! Please open an issue first to discuss any major chang
 This project is licensed under the MIT License.
 
 ## 📬 Contact
-For any inquiries or support, reach out at [your-email@example.com].
+For any inquiries or support, reach out at [esliehh@gmail.com].
 
 ---
 When you need to send it, **just Sendit.** 🚀
