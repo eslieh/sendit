@@ -3,6 +3,7 @@ import Usernav from "../../components/Usernav";
 import api from "../../services/api";
 import TransitDeliveries from "../../components/TransitDeliveries";
 import { useNavigate } from "react-router-dom";
+import { useNotify } from "../../services/NotifyContext";
 const UserHome = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [pickupLocation, setPickupLocation] = useState("");
@@ -17,7 +18,7 @@ const UserHome = () => {
   const handleModalToggle = () => {
     setModalOpen(!modalOpen);
   };
-  
+  const notify = useNotify();
   useEffect(() => {
     const accessToken = sessionStorage.getItem('access_token');
     if (!accessToken) {
@@ -95,34 +96,39 @@ const UserHome = () => {
     }
   };
   const requestsDelivery = async (id) => {
-    const authorise = alert("Are you sure?")
+    const confirmAction = window.confirm("Are you sure?");
+    if (!confirmAction) return; // Stop execution if the user cancels
+
     const endpoint = '/orders';
-    const deliverly = {
+    const delivery = {
       courier_id: id,
       description: packageDescription,
       pickup_location: pickupLocation,
       delivery_location: deliveryLocation, 
       distance: distance
     };
-  
+
     try {
-      const response = await api.post(endpoint, deliverly);
+      const response = await api.post(endpoint, delivery);
       
-      const responseMessage = response?.message || "No response message";
-      navigate('/user/deliveries')
-      alert(responseMessage);
-  
-      if (responseMessage !== "Order created successfully") {
-        alert(responseMessage);
-      } else {
-        console.log("Delivery request was successful");
-        // You can add further logic here (e.g., redirect or update UI)
-      }
+      // If the request is successful, get the message from response.data
+      const responseMessage = response?.data?.message || "Order created successfully";
+      
+      notify(responseMessage);
+      navigate('/user/deliveries');
+      
     } catch (err) {
       console.error("Delivery request failed:", err);
-      setError("Failed to request delivery");
+
+      // Handle errors from the server response
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || "Failed to request delivery";
+      notify(errorMessage, true);
+      if(errorMessage === "Insufficient funds"){
+        navigate('/user/account')
+        notify('top-up your wallet to continue')
+      }
     }
-  };
+};
   
   return (
     <div className="main_user_class">
