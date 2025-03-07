@@ -70,7 +70,7 @@ const Company = () => {
     sessionStorage.removeItem("userToken");
     localStorage.removeItem("userToken");
     notify("Logging out...", true);
-    window.location.href = "/auth";
+    window.location.href = "/auth?ref=courier";
   };
 
   return (
