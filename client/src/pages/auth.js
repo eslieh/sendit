@@ -40,26 +40,32 @@ const Auth = () => {
 
     setLoading(true);
     const endpoint = isLogin
-      ? role === "user" ? "/login_user" : "/login_courier"
-      : role === "user" ? "/signup_user" : "/signup_courier";
+        ? role === "user" ? "/login_user" : "/login_courier"
+        : role === "user" ? "/signup_user" : "/signup_courier";
 
     try {
-      const response = await api.post(endpoint, formData);
+        const response = await api.post(endpoint, formData);
 
-      if (isLogin) {
-        setToken(response.access_token);
-        notify(response.message, false); // Success notification
-        navigate(role === "user" ? "/user" : "/courier");
-      } else {
-        notify("Signup successful! Please log in.", false);
-        setIsLogin(true);
-      }
+        if (isLogin) {
+            setToken(response.data?.access_token); // Ensure you access .data
+            notify(response.data?.message || "Login successful!", false); // Use response.data.message
+            navigate(role === "user" ? "/user" : "/courier");
+        } else {
+            notify("Signup successful! Please log in.", false);
+            setIsLogin(true);
+        }
     } catch (error) {
-      notify(error.response?.data?.message || "Something went wrong.", true);
+        console.error("Auth error:", error.response?.data); // Log for debugging
+        const errorMessage =
+            error.response?.data?.error || // Check if `error` field exists
+            error.response?.data?.message || // Check `message`
+            "Something went wrong. Please try again.";
+        notify(errorMessage, true); // Show the error message
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
 
   return (
     <div className="auth-container">

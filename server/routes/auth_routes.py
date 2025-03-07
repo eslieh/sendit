@@ -65,7 +65,7 @@ def init_auth_routes(app, bcrypt):
             access_token = create_access_token(identity=user.id)
             return jsonify({'message': 'Login Success!', 'access_token': access_token, 'role': 'user'})
 
-        return jsonify({'message': 'Login Failed!'}), 401
+        return jsonify({'message': 'Login Failed!, check credentials'}), 401
 
     @app.route('/login_courier', methods=['POST'])
     def login_courier():
@@ -82,7 +82,7 @@ def init_auth_routes(app, bcrypt):
             access_token = create_access_token(identity=courier.id)
             return jsonify({'message': 'Login Success!', 'access_token': access_token, 'role': 'courier'})
 
-        return jsonify({'message': 'Login Failed!'}), 401
+        return jsonify({'message': 'Login Failed!, check credentials'}), 401
     
     @app.route('/get_user_name', methods=['GET'])
     @jwt_required()
