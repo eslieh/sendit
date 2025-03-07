@@ -86,14 +86,17 @@
     background: #28a7468f;
     color: white;
   }
+
   .update-btn {
     background: #007bff;
-    color: white;
     border: none;
-    padding: 8px 12px;
     border-radius: 6px;
+    color: #fff;
     cursor: pointer;
-    transition: 0.3s ease-in-out;
+    width: 100%;
+    padding: 8px 12px;
+    transition: .3s ease-in-out;
+    margin-bottom: 3px;
   }
   
   .update-btn:hover {
