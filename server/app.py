@@ -15,7 +15,7 @@ from routes.courier_routes import init_courier_routes
 from routes.courier_stats import init_courier_stats
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://sendit_uoak_user:3H6EL9v3Fd3FdymqfFLQoXvzJnqWyGKU@dpg-cv0qp2jqf0us73a1i2tg-a.oregon-postgres.render.com/sendit_uoak'
 app.config['SECRET_KEY'] = 'your_strong_secret_key'
 app.config["JWT_SECRET_KEY"] = 'your_jwt_secret_key'
 app.config['JWT_TOKEN_LOCATION'] = ['headers']
