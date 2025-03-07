@@ -53,19 +53,10 @@ yarn start  # or npm start
 ```
 The frontend should now be running on `http://localhost:3000/`.
 
-## 📜 API Endpoints
-| Method | Endpoint             | Description                  |
-|--------|----------------------|------------------------------|
-| GET    | /api/deliveries      | Fetch all deliveries        |
-| POST   | /api/deliveries      | Create a new delivery       |
-| GET    | /api/deliveries/:id  | Get details of a delivery   |
-| PATCH  | /api/deliveries/:id  | Update delivery status      |
-| DELETE | /api/deliveries/:id  | Cancel a delivery          |
-
 ## 🌍 Deployment
-- **Frontend:** Vercel / Netlify
-- **Backend:** Render / Heroku / AWS
-- **Database:** Hosted MySQL or SQLite for local development
+- **Frontend:** Vercel 
+ **Backend:** Render 
+- **Database:** Postgresql
 
 ## 🤝 Contributing
 Pull requests are welcome! Please open an issue first to discuss any major changes.
